@@ -24,7 +24,11 @@ export default function ForgotPasswordPage() {
       console.log(response)
 
       if (response.status == 200) {
-        route.push("/auth/changePassword");
+        localStorage.setItem("RESET_EMAIL", email);
+        toast.success("OTP sent to your email");
+        setTimeout(() => {
+          route.push("/auth/verifyOtp");
+        }, 1500);
       } else {
         console.log("eroorafasf -1");
         toast.error("Email not found");

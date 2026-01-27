@@ -26,5 +26,30 @@ export const User = new EntitySchema({
       updateDate: true,
       nullable: false,
     },
+    otp: {
+      type: "varchar",
+      nullable: true,
+    },
+    otpExpires: {
+      type: "datetime",
+      nullable: true,
+    },
+  },
+  relations: {
+    studentProfile: {
+      type: "one-to-one",
+      target: "Student",
+      inverseSide: "user",
+    },
+    parentProfile: {
+      type: "one-to-one",
+      target: "Parent",
+      inverseSide: "user",
+    },
+    teacherProfile: {
+      type: "one-to-one",
+      target: "Teacher",
+      inverseSide: "user",
+    },
   },
 });
