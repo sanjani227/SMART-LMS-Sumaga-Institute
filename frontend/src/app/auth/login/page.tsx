@@ -14,9 +14,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
 
-  const key = "NAME";
+  const nameKey = "NAME";
+  const userTypeKey = "USER_TYPE"
 
-  const { setName } = useContext(UserContext);
+  const { setName , setUserType} = useContext(UserContext);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ export default function LoginPage() {
       console.log(response.status);
       const userLoggedName = response.data.data.firstName;
       const userLoggedEmail = response.data.data.email;
+      const userLoggedUserType = response.data.data.userType || "guest"
 
       const name =
         userLoggedName && userLoggedName.trim() !== ""
@@ -40,15 +42,36 @@ export default function LoginPage() {
           : userLoggedEmail.split("@")[0];
 
       setName(name);
+      setUserType(userLoggedUserType)
 
-      var local = localStorage.setItem(key, name);
+
+      var local = localStorage.setItem(nameKey, name);
+      var local = localStorage.setItem(userTypeKey, userLoggedUserType);
       console.log(local);
 
       toast.success("User logged successfully");
 
       setTimeout(() => {
-        router.push("/dashboard");
+        switch (userLoggedUserType.toLowerCase()) {
+          case "admin":
+            router.push("/dashboard");
+            break;
+          case "student":
+            router.push("/dashboard/");
+            break;
+          case "teacher":
+            router.push("/dashboard/");
+            break;
+          case "parent":
+            router.push("/dashboard/");
+            break;
+          case "guest":
+          default:
+            router.push("/dashboard/guest/announcements");
+            break;
+        }
       }, 1500);
+      
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
