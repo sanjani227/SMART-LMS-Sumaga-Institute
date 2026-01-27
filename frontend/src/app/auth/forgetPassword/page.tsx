@@ -24,6 +24,7 @@ export default function ForgotPasswordPage() {
       console.log(response)
 
       if (response.status == 200) {
+        localStorage.setItem("RESET_EMAIL", email);
         route.push("/auth/changePassword");
       } else {
         console.log("eroorafasf -1");

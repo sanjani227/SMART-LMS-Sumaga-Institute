@@ -27,4 +27,21 @@ export const User = new EntitySchema({
       nullable: false,
     },
   },
+  relations: {
+    studentProfile: {
+      type: "one-to-one",
+      target: "Student",
+      inverseSide: "user",
+    },
+    parentProfile: {
+      type: "one-to-one",
+      target: "Parent",
+      inverseSide: "user",
+    },
+    teacherProfile: {
+      type: "one-to-one",
+      target: "Teacher",
+      inverseSide: "user",
+    },
+  },
 });

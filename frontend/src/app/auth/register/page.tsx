@@ -181,7 +181,7 @@ export default function RegisterPage() {
                 disabled={isSubmitting}
                 className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 disabled:opacity-50"
               >
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isSubmitting ? "Signing up..." : "Sign Up"}
               </button>
             </div>
           </form>

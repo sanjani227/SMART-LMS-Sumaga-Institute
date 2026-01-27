@@ -12,13 +12,13 @@ const userRepo = myDataSource.getRepository("User");
 export const RegisterUser = async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;
   try {
-    if (!email || !password ||!firstName || !lastName) {
+    if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({
         message: "Email and password are required",
       });
     }
 
-    const exisitingUser = await userRepo.findOne({where: {email}});
+    const exisitingUser = await userRepo.findOne({ where: { email } });
     if (exisitingUser) {
       return res.status(400).json({
         message: "User already exists",
@@ -64,7 +64,7 @@ export const LoginUser = async (req, res) => {
       });
     }
 
-    const exisitingUser = await userRepo.findOne({where: {email}});
+    const exisitingUser = await userRepo.findOne({ where: { email } });
     if (!exisitingUser) {
       return res.status(400).json({
         message: "User does not exist",
@@ -109,13 +109,13 @@ export const validateEmail = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(404).json({
+      return res.status(400).json({
         message: "Enter Email",
       });
     }
 
-    const validEmail = await userRepo.findOne({ email });
-    console.log(validEmail);
+    const validEmail = await userRepo.findOne({ where: { email } });
+
     if (!validEmail) {
       return res.status(404).json({
         message: "Email not found",
@@ -123,23 +123,39 @@ export const validateEmail = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: " email found",
+      message: "Email found",
     });
   } catch (error) {
-    throw new Error(error);
+    console.error('Error in validateEmail:', error);
+    return res.status(500).json({ message: error.message });
   }
 };
 
-export const ChangePassword = (req, res) => {
-  const { email, oldPassword, newPassword, confirmNewPassword } = req.body;
+export const ChangePassword = async (req, res) => {
+  const { email, newPassword } = req.body;
 
-  if (!oldPassword || !newPassword || !confirmNewPassword || !email) {
+  if (!newPassword || !email) {
     return res.status(400).json({
-      message: "All fields are required",
+      message: "Email and new password are required",
     });
   }
 
-  res.status(200).json({
-    message: "Password changed successfully",
-  });
+  try {
+    const user = await userRepo.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await userRepo.save(user);
+
+    res.status(200).json({
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
 };
