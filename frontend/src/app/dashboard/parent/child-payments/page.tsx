@@ -1,7 +1,7 @@
 export default function ChildPayments() {
     const invoices = [
-        { label: "Tuition - March", amount: "$450", status: "Paid" },
-        { label: "Activity Fee", amount: "$40", status: "Pending" },
+        { label: "Tuition - March", amount: "Rs1450", status: "Paid" },
+        { label: "Activity Fee", amount: "RS400", status: "Pending" },
     ];
 
     return (

@@ -27,7 +27,7 @@ export default function RegisterPage() {
   ];
 
   const nameKey = "NAME";
-  const userTypeKey = "USER_TYPE"
+  const userTypeKey = "USER_TYPE";
 
   const {
     register,
@@ -49,10 +49,10 @@ export default function RegisterPage() {
       const response = await axios.post(
         "http://localhost:3000/api/v1/auth/register",
         {
-          firstName,
-          lastName,
-          email,
-          password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
           userType
         },
       );
@@ -116,7 +116,7 @@ export default function RegisterPage() {
             </h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="flex grow justify-around w-full bg-gray-200 py-2 px-1 rounded-2xl">
               {typeOptions.map((element) => {
                 const active = userType == element.value;

@@ -1,8 +1,8 @@
 export default function StudentPayments() {
     const invoices = [
-        { label: "Tuition - March", amount: "$450", status: "Paid" },
-        { label: "Lab Fee", amount: "$60", status: "Pending" },
-        { label: "Library", amount: "$20", status: "Paid" },
+        { label: "Tuition - March", amount: "Rs1450", status: "Paid" },
+        { label: "Lab Fee", amount: "Rs600", status: "Pending" },
+        { label: "Library", amount: "Rs200", status: "Paid" },
     ];
 
     return (
