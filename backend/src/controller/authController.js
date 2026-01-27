@@ -122,11 +122,79 @@ export const validateEmail = async (req, res) => {
       });
     }
 
+    // Generate OTP
+    const { generateOTP, logOTP } = await import('../utils/otpUtils.js');
+    const otp = generateOTP();
+
+    // Set expiry to 10 minutes from now
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    // Save OTP to database
+    validEmail.otp = otp;
+    validEmail.otpExpires = otpExpires;
+    await userRepo.save(validEmail);
+
+    // Log OTP to console (instead of email)
+    logOTP(email, otp);
+
     return res.status(200).json({
-      message: "Email found",
+      message: "OTP generated",
     });
   } catch (error) {
     console.error('Error in validateEmail:', error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const verifyOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    const user = await userRepo.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Check if OTP exists
+    if (!user.otp) {
+      return res.status(400).json({
+        message: "No OTP found. Please request a new one.",
+      });
+    }
+
+    // Check if OTP has expired
+    if (new Date() > new Date(user.otpExpires)) {
+      return res.status(400).json({
+        message: "OTP has expired. Please request a new one.",
+      });
+    }
+
+    // Verify OTP
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    // OTP is valid - clear it from database
+    user.otp = null;
+    user.otpExpires = null;
+    await userRepo.save(user);
+
+    return res.status(200).json({
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    console.error('Error in verifyOTP:', error);
     return res.status(500).json({ message: error.message });
   }
 };

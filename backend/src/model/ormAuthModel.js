@@ -26,6 +26,14 @@ export const User = new EntitySchema({
       updateDate: true,
       nullable: false,
     },
+    otp: {
+      type: "varchar",
+      nullable: true,
+    },
+    otpExpires: {
+      type: "datetime",
+      nullable: true,
+    },
   },
   relations: {
     studentProfile: {
