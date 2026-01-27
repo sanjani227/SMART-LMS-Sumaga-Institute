@@ -6,28 +6,40 @@ import Image from "next/image";
 import { LogOut } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, RegisterSchema } from "@/src/validations/auth";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
 
   const key = "NAME";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterSchema>({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    },
+  });
 
+  const onSubmit = async (data: RegisterSchema) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/v1/auth/register",
         {
-          firstName,
-          lastName,
-          email,
-          password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
         },
       );
 
@@ -35,8 +47,7 @@ export default function LoginPage() {
       const userLoggedEmail = response.data.data.email;
       const name = userLoggedEmail.split("@")[0];
 
-      var local = localStorage.setItem(key, name);
-      console.log(local);
+      localStorage.setItem(key, name);
 
       toast.success("User logged successfully");
 
@@ -46,10 +57,10 @@ export default function LoginPage() {
     } catch (error: any) {
       if (error.response) {
         const status = error.response.status;
-        const message = error.response.message;
+        const message = error.response.data?.message || error.response.message; // Fixed access to message
 
         if (status === 400) {
-          toast.error(message  || "Some Fields are Empty");
+          toast.error(message || "Some Fields are Empty");
         } else if (status === 401) {
           toast.error("Unauthorized access");
         } else if (status === 404) {
@@ -77,7 +88,6 @@ export default function LoginPage() {
           {/* Graduation Cap Icon (Absolute Positioned) */}
           <div className="absolute top-4 left-4 w-20 h-20">
             <div className="text-5xl">🎓</div>{" "}
-            {/* You can replace this with an <img> tag */}
           </div>
 
           <div className="text-center mb-10">
@@ -87,42 +97,62 @@ export default function LoginPage() {
             </h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <input
-                type="name"
+                type="text"
                 placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700"
+                {...register("firstName")}
+                className={`w-full px-4 py-3 rounded-xl border ${errors.firstName ? "border-red-500" : "border-gray-400"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700`}
               />
+              {errors.firstName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.firstName.message}
+                </p>
+              )}
             </div>
             <div>
               <input
-                type="name"
+                type="text"
                 placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700"
+                {...register("lastName")}
+                className={`w-full px-4 py-3 rounded-xl border ${errors.lastName ? "border-red-500" : "border-gray-400"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700`}
               />
+              {errors.lastName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.lastName.message}
+                </p>
+              )}
             </div>
             <div>
               <input
                 type="email"
                 placeholder="email@gmail.com"
-                value={email.toLowerCase()}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700"
+                {...register("email")}
+                className={`w-full px-4 py-3 rounded-xl border ${errors.email ? "border-red-500" : "border-gray-400"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700`}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
             <div>
               <input
                 type="password"
                 placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700"
+                {...register("password")}
+                className={`w-full px-4 py-3 rounded-xl border ${errors.password ? "border-red-500" : "border-gray-400"
+                  } focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-700`}
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center text-gray-600">
@@ -148,9 +178,10 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200"
+                disabled={isSubmitting}
+                className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-xl shadow-lg transition duration-200 disabled:opacity-50"
               >
-                Sign in
+                {isSubmitting ? "Signing in..." : "Sign in"}
               </button>
             </div>
           </form>
@@ -159,7 +190,6 @@ export default function LoginPage() {
         {/* Right Side: Illustration */}
         <div className="hidden md:flex w-1/2 bg-white items-center justify-center p-8">
           <div className="relative w-full h-full min-h-[400px]">
-            {/* Replace '/login-illustration.png' with your actual image path */}
             <Image
               src="/login-image.png"
               alt="LMS Illustration"
