@@ -10,7 +10,9 @@ import { useContext } from "react";
 export default function DashboardPage() {
   const router = useRouter();
 
-  const { name } = useContext(UserContext) || { name: "GUEST" };
+  const { name, userType } =
+    useContext(UserContext) || ({ name: "GUEST", userType: "guest" } as const);
+  const role = (userType || "guest").toLowerCase();
 
   const announcements = [
     {
@@ -44,7 +46,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex w-full justify-end bg-gray-100 gap-4 py-2 pr-4">
+      {/* <div className="flex w-full justify-end bg-gray-100 gap-4 py-2 pr-4">
         <button>
           <div className="relative">
             <Bell></Bell>
@@ -61,165 +63,194 @@ export default function DashboardPage() {
         <h3> {name || "GUEST"} </h3>
 
         <LogOut onClick={handleLogOut}></LogOut>
-      </div>
+      </div> */}
 
-      <div className="flex flex-col  w-full gap-4 pr-4">
+      <div className="flex flex-col w-full gap-4 pr-4">
         <section className="px-6 py-4">
-          <h1 className="text-xl font-semibold ">Welcome Perera</h1>
+          <h1 className="text-xl font-semibold ">Welcome {name || "Guest"}</h1>
           <p className="text-sm text-gray-600">
             Here's what's happening with your account today.
           </p>
         </section>
 
-        <div>
-          <div className="flex justify-evenly ">
-            <div className="bg-white-400 w-[162] h-[152] border rounded-2xl   border-black">
-              <div className=" flex gap-2 justify-center items-center content-center h-[100]">
-                <User />
-                <div>Total Students 1,234</div>
-              </div>
-
-              <div className="bg-gray-300 h-[52] border-b rounded-b-2xl  flex justify-center items-center border-black ">
-                <span className="text-green-600">12%</span>{" "}
-                <span>from last month</span>
-              </div>
-            </div>
-            <div className="bg-white-400 w-[162] h-[152] border rounded-2xl   border-black">
-              <div className=" flex gap-2 justify-center items-center content-center h-[100]">
-                <User />
-                <div>Total Students 1,234</div>
-              </div>
-
-              <div className="bg-gray-300 h-[52] border-b rounded-b-2xl   border-black content-center">
-                <span className="text-green-600">12%</span>{" "}
-                <span>from last month</span>
-              </div>
-            </div>
-            <div className="bg-white-400 w-[162] h-[152] border rounded-2xl   border-black">
-              <div className=" flex gap-2 justify-center items-center content-center h-[100]">
-                <User />
-                <div>Total Students 1,234</div>
-              </div>
-
-              <div className="bg-gray-300 h-[52] border-b rounded-b-2xl   border-black content-center">
-                <span className="text-green-600">12%</span>{" "}
-                <span>from last month</span>
-              </div>
-            </div>
-            <div className="bg-white-400 w-[162] h-[152] border rounded-2xl   border-black">
-              <div className=" flex gap-2 justify-center items-center content-center h-[100]">
-                <User />
-                <div>Total Students 1,234</div>
-              </div>
-
-              <div className="bg-gray-300 h-[52] border-b rounded-b-2xl   border-black content-center">
-                <span className="text-green-600">12%</span>{" "}
-                <span>from last month</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-evenly w-full gap-4 mx-2">
-          <div className="border rounded-2xl w-full h-full gap-4 ">
-            Recent Announcements
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-gray-800">
-                          {announcement.title}
-                        </h3>
-                        <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">
-                          {announcement.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mb-3">
-                        {announcement.content}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Bell size={14} />
-                          {announcement.category}
-                        </span>
-                        <span>By {announcement.by}</span>
-                        <span>{announcement.date}</span>
-                        <span>
-                          Audience: {announcement.audience.join(", ")}
-                        </span>
-                      </div>
+        {role === "admin" && (
+          <>
+            <div>
+              <div className="flex justify-evenly ">
+                {[1, 2, 3, 4].map((item) => (
+                  <div
+                    key={item}
+                    className="bg-white-400 w-[162] h-[152] border rounded-2xl border-black"
+                  >
+                    <div className=" flex gap-2 justify-center items-center content-center h-[100]">
+                      <User />
+                      <div>Total Students 1,234</div>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition">
-                        <Eye size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-orange-50 text-orange-600 rounded-lg transition">
-                        <Pencil size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition">
-                        <Trash2 size={18} />
-                      </button>
+
+                    <div className="bg-gray-300 h-[52] border-b rounded-b-2xl  flex justify-center items-center border-black ">
+                      <span className="text-green-600">12%</span>{" "}
+                      <span>from last month</span>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-evenly w-full gap-4 mx-2">
+              {[1, 2].map((col) => (
+                <div key={col} className="border rounded-2xl w-full h-full gap-4 ">
+                  Recent Announcements
+                  <div className="space-y-4">
+                    {announcements.map((announcement) => (
+                      <div
+                        key={announcement.id}
+                        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition"
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="text-lg font-bold text-gray-800">
+                                {announcement.title}
+                              </h3>
+                              <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">
+                                {announcement.status}
+                              </span>
+                            </div>
+                            <p className="text-gray-600 text-sm mb-3">
+                              {announcement.content}
+                            </p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Bell size={14} />
+                                {announcement.category}
+                              </span>
+                              <span>By {announcement.by}</span>
+                              <span>{announcement.date}</span>
+                              <span>
+                                Audience: {announcement.audience.join(", ")}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition">
+                              <Eye size={18} />
+                            </button>
+                            <button className="p-2 hover:bg-orange-50 text-orange-600 rounded-lg transition">
+                              <Pencil size={18} />
+                            </button>
+                            <button className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition">
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-          <div className="border rounded-2xl w-full h-full gap-4">
-            Recent Announcements
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-gray-800">
-                          {announcement.title}
-                        </h3>
-                        <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">
-                          {announcement.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-600 text-sm mb-3">
-                        {announcement.content}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Bell size={14} />
-                          {announcement.category}
-                        </span>
-                        <span>By {announcement.by}</span>
-                        <span>{announcement.date}</span>
-                        <span>
-                          Audience: {announcement.audience.join(", ")}
-                        </span>
-                      </div>
+          </>
+        )}
+
+        {role !== "admin" && (
+          <div className="space-y-6 px-4 pb-6">
+            {/* Quick summary cards per role */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {role === "student" && (
+                <>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Next class</p>
+                    <p className="text-lg font-semibold">Math - 2:00 PM</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Assignments</p>
+                    <p className="text-lg font-semibold">2 due this week</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Payments</p>
+                    <p className="text-lg font-semibold">No pending dues</p>
+                  </div>
+                </>
+              )}
+
+              {role === "teacher" && (
+                <>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Classes today</p>
+                    <p className="text-lg font-semibold">3 sessions</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Assignments to grade</p>
+                    <p className="text-lg font-semibold">12 pending</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Messages</p>
+                    <p className="text-lg font-semibold">5 new</p>
+                  </div>
+                </>
+              )}
+
+              {role === "parent" && (
+                <>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Child progress</p>
+                    <p className="text-lg font-semibold">Latest report available</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Payments</p>
+                    <p className="text-lg font-semibold">Invoice #124 due soon</p>
+                  </div>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm">
+                    <p className="text-sm text-gray-500">Attendance</p>
+                    <p className="text-lg font-semibold">Perfect this week</p>
+                  </div>
+                </>
+              )}
+
+              {role === "guest" && (
+                <>
+                  <div className="bg-white border rounded-2xl p-4 shadow-sm col-span-1 sm:col-span-2 lg:col-span-3">
+                    <p className="text-sm text-gray-500">Welcome</p>
+                    <p className="text-lg font-semibold">Explore announcements and updates.</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Announcements shared for all non-admin roles */}
+            <div className="border rounded-2xl w-full h-full gap-4 bg-white shadow-sm">
+              <div className="px-4 py-3 font-semibold">Latest announcements</div>
+              <div className="space-y-4 p-4">
+                {announcements.map((announcement) => (
+                  <div
+                    key={announcement.id}
+                    className="bg-white p-4 rounded-xl border border-gray-100"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-base font-semibold text-gray-800">
+                        {announcement.title}
+                      </h3>
+                      <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-semibold">
+                        {announcement.status}
+                      </span>
                     </div>
-                    <div className="flex gap-2">
-                      <button className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition">
-                        <Eye size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-orange-50 text-orange-600 rounded-lg transition">
-                        <Pencil size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition">
-                        <Trash2 size={18} />
-                      </button>
+                    <p className="text-gray-600 text-sm mb-2">
+                      {announcement.content}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Bell size={14} />
+                        {announcement.category}
+                      </span>
+                      <span>{announcement.date}</span>
+                      <span>Audience: {announcement.audience.join(", ")}</span>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );

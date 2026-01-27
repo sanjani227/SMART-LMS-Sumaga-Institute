@@ -13,8 +13,21 @@ import { registerSchema, RegisterSchema } from "@/src/validations/auth";
 export default function RegisterPage() {
   const router = useRouter();
   const [remember, setRemember] = useState(false);
+  const [userType, setUserType] = useState<"student" | "parent" | "teacher">(
+    "student",
+  );
 
-  const key = "NAME";
+  const typeOptions: Array<{
+    label: string;
+    value: "student" | "parent" | "teacher";
+  }> = [
+    { label: "STUDENT", value: "student" },
+    { label: "PARENT", value: "parent" },
+    { label: "TEACHER", value: "teacher" },
+  ];
+
+  const nameKey = "NAME";
+  const userTypeKey = "USER_TYPE"
 
   const {
     register,
@@ -36,18 +49,22 @@ export default function RegisterPage() {
       const response = await axios.post(
         "http://localhost:3000/api/v1/auth/register",
         {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          password: data.password,
+          firstName,
+          lastName,
+          email,
+          password,
+          userType
         },
       );
 
       console.log(response);
       const userLoggedEmail = response.data.data.email;
       const name = userLoggedEmail.split("@")[0];
+      const userLoggedUserType = response.data.data.userType
 
-      localStorage.setItem(key, name);
+      var local = localStorage.setItem(nameKey, name);
+      var local = localStorage.setItem(userTypeKey, userLoggedUserType);
+      console.log(local);
 
       toast.success("User logged successfully");
 
@@ -91,13 +108,35 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold text-orange-500 italic">Sign Up</h1>
+            <h1 className="text-4xl font-bold text-orange-500 italic">
+              Sign Up
+            </h1>
             <h2 className="text-4xl font-bold text-orange-600 mt-2 italic">
               Welcome
             </h2>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex grow justify-around w-full bg-gray-200 py-2 px-1 rounded-2xl">
+              {typeOptions.map((element) => {
+                const active = userType == element.value;
+                return (
+                  <button
+                  type="button"
+                    key={element.value}
+                    onClick={() => setUserType(element.value)}
+                    className={`px-4 py-4 rounded-xl m-1 font-semibold sm:text-base md:text-sm transition ${
+                      active
+                        ? "bg-orange-400 text-white shadow w-full md:w-1/3 sm:w-1/4"
+                        : "bg-gray-100 text-gray-800 hover:bg-gray-300 w-full md:w-1/3 sm:w-1/4"
+                    }`}
+                  >
+                    {element.label}
+                  </button>
+                );
+              })}
+            </div>
+
             <div>
               <input
                 type="text"
@@ -200,9 +239,6 @@ export default function RegisterPage() {
         </div>
 
         {/* Small Logout/Exit Icon at bottom right */}
-        <div className="absolute bottom-4 right-4 text-gray-400 cursor-pointer hover:text-gray-600">
-          <LogOut size={24} />
-        </div>
       </div>
     </div>
   );
