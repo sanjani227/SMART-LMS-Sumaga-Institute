@@ -15,11 +15,11 @@ export default function StudentPayments() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Total due</p>
-                    <p className="text-2xl font-bold">$60</p>
+                    <p className="text-2xl font-bold">RS600</p>
                 </div>
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Paid this month</p>
-                    <p className="text-2xl font-bold">$470</p>
+                    <p className="text-2xl font-bold">RS470</p>
                 </div>
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Pending invoices</p>

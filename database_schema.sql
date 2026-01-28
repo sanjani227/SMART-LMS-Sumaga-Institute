@@ -1,9 +1,4 @@
--- =======================================================================================
--- Database Schema for Sumaga Institute Smart LMS
--- Purpose: Create strictly 3NF schema with strict data validation matching frontend rules.
--- Author: Database Architect (Antigravity)
--- Dependencies: None (Creates database from scratch)
--- =======================================================================================
+
 
 -- 1. Database Creation (Fail-safe: Drops existing DB to ensure clean state)
 DROP DATABASE IF EXISTS sumaga_lms;

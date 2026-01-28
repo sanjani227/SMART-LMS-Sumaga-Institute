@@ -1,8 +1,8 @@
 export default function StudentCourses() {
     const courses = [
-        { name: "Mathematics", teacher: "Ms. Lee", progress: "78%" },
-        { name: "Physics", teacher: "Mr. Kumar", progress: "64%" },
-        { name: "History", teacher: "Mrs. Grant", progress: "92%" },
+        { name: "Mathematics", teacher: "Ms.Ruwani", progress: "78%" },
+        { name: "Physics", teacher: "Mr.Janaka", progress: "64%" },
+        { name: "History", teacher: "Mrs.Shalani", progress: "92%" },
     ];
 
     return (
