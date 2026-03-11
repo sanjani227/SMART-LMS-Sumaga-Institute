@@ -33,10 +33,10 @@ export default function TeacherProfile() {
   const fetchTeacherProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/profile`,
+        `http://localhost:3000/api/v1/teachers/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export default function TeacherProfile() {
   const fetchSubjects = async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/subjects`
+        `http://localhost:3000/api/v1/subjects`
       );
 
       if (response.data.code === 200) {
@@ -78,10 +78,10 @@ export default function TeacherProfile() {
       setError(null);
       setSuccess(null);
       
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("TOKEN");
       
       const response = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/specialization`,
+        `http://localhost:3000/api/v1/teachers/specialization`,
         { specialization: selectedSubject },
         {
           headers: {

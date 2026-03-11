@@ -1,414 +1,289 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Plus, Calendar, Users, Edit, Eye, GraduationCap, Clock } from "lucide-react";
+
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { ClipboardList, Plus, X, Calendar, FileText, Users } from "lucide-react";
+import Link from "next/link";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-interface Assignment {
-  assignmentId: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  maxScore: number;
-  submissionCount: number;
-  class: {
-    classId: number;
-    subject: {
-      subjectName: string;
-      gradeLevel: string;
-    };
-    scheduleDay: string;
-    scheduleTime: string;
-  };
-  createdAt: string;
-}
-
-interface Class {
-  classId: number;
-  subject: {
-    subjectId: number;
-    subjectName: string;
-    gradeLevel: string;
-  };
-  scheduleDay: string;
-  scheduleTime: string;
-}
-
-export default function TeacherAssignments() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [teacherClasses, setTeacherClasses] = useState<Class[]>([]);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+export default function TeacherAssignmentsPage() {
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [newAssignment, setNewAssignment] = useState({
-    classId: "",
-    title: "",
-    description: "",
-    dueDate: "",
-    maxScore: 100,
-  });
+  // Form State
+  const [classId, setClassId] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [maxScore, setMaxScore] = useState("100");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchAssignments();
-    fetchTeacherClasses();
+    fetchClasses();
   }, []);
 
   const fetchAssignments = async () => {
     try {
-      setLoading(true);
-      const token = localStorage.getItem("authToken");
-      
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.code === 200) {
-        setAssignments(response.data.data);
-      } else {
-        setError(response.data.message || "Failed to fetch assignments");
+      const token = localStorage.getItem("TOKEN");
+      const res = await axios.get("http://localhost:3000/api/v1/teachers/assignments", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.data) {
+        setAssignments(res.data.data);
       }
-    } catch (error: any) {
-      console.error("Error fetching assignments:", error);
-      setError(error.response?.data?.message || "Error fetching assignments");
+    } catch (error) {
+      console.error("Error fetching assignments", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchTeacherClasses = async () => {
+  const fetchClasses = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      const token = localStorage.getItem("TOKEN");
+      const res = await axios.get("http://localhost:3000/api/v1/teachers/classes", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data?.data?.classes) {
+        setClasses(res.data.data.classes);
+        if (res.data.data.classes.length > 0) {
+          setClassId(res.data.data.classes[0].classId.toString());
         }
-      );
-
-      if (response.data.code === 200) {
-        setTeacherClasses(response.data.data.classes || []);
       }
-    } catch (error: any) {
-      console.error("Error fetching classes:", error);
+    } catch (error) {
+      console.error("Error fetching classes", error);
     }
   };
 
-  const handleCreateAssignment = async () => {
-    try {
-      if (!newAssignment.classId || !newAssignment.title || !newAssignment.dueDate) {
-        alert("Please fill in all required fields");
-        return;
-      }
+  const handleCreateAssignment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!classId || !title || !dueDate) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
-      const token = localStorage.getItem("authToken");
-      
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments`,
-        newAssignment,
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("TOKEN");
+      const res = await axios.post(
+        "http://localhost:3000/api/v1/teachers/assignments",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          classId: parseInt(classId),
+          title,
+          description,
+          dueDate,
+          maxScore: parseFloat(maxScore),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (response.data.code === 200) {
-        setShowCreateModal(false);
-        setNewAssignment({
-          classId: "",
-          title: "",
-          description: "",
-          dueDate: "",
-          maxScore: 100,
-        });
-        fetchAssignments(); // Refresh assignments
+      if (res.data.code === 200) {
+        toast.success("Assignment created successfully");
+        setIsModalOpen(false);
+        // Reset form
+        setTitle("");
+        setDescription("");
+        setDueDate("");
+        setMaxScore("100");
+        fetchAssignments(); // Refresh list
       } else {
-        alert(response.data.message || "Failed to create assignment");
+        toast.error(res.data.message || "Failed to create assignment");
       }
     } catch (error: any) {
-      console.error("Error creating assignment:", error);
-      alert(error.response?.data?.message || "Error creating assignment");
+      toast.error(error.response?.data?.message || "Error creating assignment");
+    } finally {
+      setSubmitting(false);
     }
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const getDaysUntilDue = (dueDate: string) => {
-    const today = new Date();
-    const due = new Date(dueDate);
-    const diffTime = due.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  if (loading) {
-    return (
-      <div className="p-6 flex justify-center items-center min-h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="text-gray-500 mt-2">Loading assignments...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error: {error}</p>
-          <button 
-            onClick={fetchAssignments}
-            className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+    <div className="p-6">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Assignments</h2>
-          <p className="text-sm text-gray-500">Create and manage assignments for your classes.</p>
+          <h1 className="text-2xl font-bold text-gray-800">Assignments</h1>
+          <p className="text-sm text-gray-500">Manage your course assignments</p>
         </div>
         <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl transition shadow-sm"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus size={20} />
           Create Assignment
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <GraduationCap className="w-8 h-8 text-blue-600" />
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-blue-800">
-                {assignments.length}
-              </h3>
-              <p className="text-sm text-blue-600">Total Assignments</p>
-            </div>
-          </div>
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         </div>
-        
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <Clock className="w-8 h-8 text-yellow-600" />
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-yellow-800">
-                {assignments.filter(a => getDaysUntilDue(a.dueDate) <= 7).length}
-              </h3>
-              <p className="text-sm text-yellow-600">Due This Week</p>
-            </div>
-          </div>
+      ) : assignments.length === 0 ? (
+        <div className="bg-white p-10 rounded-2xl border text-center text-gray-500">
+          <ClipboardList className="mx-auto text-gray-300 mb-4" size={48} />
+          <p className="text-lg">No assignments created yet.</p>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {assignments.map((assignment) => (
+            <div
+              key={assignment.assignmentId}
+              className="bg-white rounded-2xl border hover:shadow-md transition p-5"
+            >
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-lg font-bold text-gray-800 truncate" title={assignment.title}>
+                  {assignment.title}
+                </h3>
+                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap">
+                  {assignment.maxScore} pts
+                </span>
+              </div>
+              
+              <div className="text-sm text-gray-500 mb-4 line-clamp-2 min-h-[40px]">
+                {assignment.description || "No description provided."}
+              </div>
 
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-green-600" />
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-green-800">
-                {assignments.reduce((sum, a) => sum + a.submissionCount, 0)}
-              </h3>
-              <p className="text-sm text-green-600">Total Submissions</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Assignments List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {assignments.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Assignments Yet</h3>
-            <p className="text-gray-500">Create your first assignment to get started.</p>
-          </div>
-        ) : (
-          assignments.map((assignment) => {
-            const daysUntilDue = getDaysUntilDue(assignment.dueDate);
-            const isOverdue = daysUntilDue < 0;
-            const isDueSoon = daysUntilDue <= 3 && daysUntilDue >= 0;
-
-            return (
-              <div
-                key={assignment.assignmentId}
-                className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                      {assignment.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {assignment.class.subject.subjectName} - Grade {assignment.class.subject.gradeLevel}
-                    </p>
-                    {assignment.description && (
-                      <p className="text-sm text-gray-500 line-clamp-2">
-                        {assignment.description}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                  </div>
+              <div className="space-y-2 text-sm text-gray-600 border-t pt-4">
+                <div className="flex items-center gap-2">
+                  <FileText size={16} className="text-gray-400" />
+                  <span className="truncate">Class: {assignment.class?.subject?.subjectName} - {assignment.class?.scheduleDay}</span>
                 </div>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Due: {formatDate(assignment.dueDate)}
-                    {isOverdue && (
-                      <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                        Overdue
-                      </span>
-                    )}
-                    {isDueSoon && !isOverdue && (
-                      <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                        Due Soon
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Users className="w-4 h-4 mr-2" />
-                    {assignment.submissionCount} submissions
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-600">
-                    <GraduationCap className="w-4 h-4 mr-2" />
-                    Max Score: {assignment.maxScore}
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Calendar size={16} className="text-gray-400" />
+                  <span className={new Date(assignment.dueDate) < new Date() ? "text-red-500 font-medium" : ""}>
+                    Due: {new Date(assignment.dueDate).toLocaleString()}
+                  </span>
                 </div>
-
-                <div className="pt-4 border-t border-gray-100">
-                  <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                    View Submissions ({assignment.submissionCount})
-                  </button>
+                <div className="flex items-center justify-between text-orange-600 font-medium pt-2 w-full">
+                  <div className="flex items-center gap-2">
+                    <Users size={16} />
+                    <span>{assignment.submissionCount} Submissions</span>
+                  </div>
+                  <Link 
+                    href={`/dashboard/teacher/assignments/${assignment.assignmentId}/submissions`}
+                    className="text-xs bg-orange-50 hover:bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg transition"
+                  >
+                    View & Grade
+                  </Link>
                 </div>
               </div>
-            );
-          })
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Create Assignment Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Create New Assignment
-            </h3>
-
-            <div className="space-y-4">
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 h-max max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-6 border-b shrink-0">
+              <h2 className="text-xl font-bold text-gray-800">Create New Assignment</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateAssignment} className="p-6 space-y-4 overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Class *
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Class
                 </label>
                 <select
-                  value={newAssignment.classId}
-                  onChange={(e) => setNewAssignment({...newAssignment, classId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={classId}
+                  onChange={(e) => setClassId(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700"
+                  required
                 >
-                  <option value="">Select a class...</option>
-                  {teacherClasses.map((cls) => (
+                  {classes.length === 0 && <option value="">No classes available</option>}
+                  {classes.map((cls) => (
                     <option key={cls.classId} value={cls.classId}>
-                      {cls.subject.subjectName} (Grade {cls.subject.gradeLevel}) - {cls.scheduleDay} {cls.scheduleTime}
+                      Class {cls.classId}: {cls.subject?.subjectName} ({cls.scheduleDay} {cls.scheduleTime})
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title *
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
                 </label>
                 <input
                   type="text"
-                  value={newAssignment.title}
-                  onChange={(e) => setNewAssignment({...newAssignment, title: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Assignment title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Midterm Essay"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
                 </label>
                 <textarea
-                  value={newAssignment.description}
-                  onChange={(e) => setNewAssignment({...newAssignment, description: e.target.value})}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Provide instructions for the assignment..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Assignment description"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700 resize-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Due Date *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={newAssignment.dueDate}
-                  onChange={(e) => setNewAssignment({...newAssignment, dueDate: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Due Date & Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Score
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={maxScore}
+                    onChange={(e) => setMaxScore(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700"
+                    required
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Max Score
-                </label>
-                <input
-                  type="number"
-                  value={newAssignment.maxScore}
-                  onChange={(e) => setNewAssignment({...newAssignment, maxScore: parseInt(e.target.value)})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  min="1"
-                />
+              <div className="pt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || classes.length === 0}
+                  className="flex-1 px-4 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition disabled:opacity-50"
+                >
+                  {submitting ? "Creating..." : "Create Assignment"}
+                </button>
               </div>
-            </div>
-
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateAssignment}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Create Assignment
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

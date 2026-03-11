@@ -5,7 +5,8 @@ import {
   getChildAttendance, 
   getChildPayments, 
   getChildProgress,
-  syncParentUser 
+  syncParentUser,
+  linkStudent
 } from '../controller/parentController.js';
 import { authenticate, requireParent } from '../middleware/authentication.js';
 
@@ -28,5 +29,8 @@ parentRoute.get("/children/:studentId/payments", authenticate, requireParent, ge
 
 // Get child's progress/grades (protected)
 parentRoute.get("/children/:studentId/progress", authenticate, requireParent, getChildProgress);
+
+// Link a student to the parent (protected)
+parentRoute.post("/link-student", authenticate, requireParent, linkStudent);
 
 export default parentRoute;
