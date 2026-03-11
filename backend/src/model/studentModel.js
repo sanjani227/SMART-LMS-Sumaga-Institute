@@ -7,9 +7,9 @@ export const Student = new EntitySchema({
         studentId: { primary: true, type: "int", generated: true },
         userId: { type: "int", nullable: false },
         fullName: { type: "varchar", nullable: false },
-        dob: { type: "date", nullable: false },
+        dob: { type: "date", nullable: true },
         address: { type: "text", nullable: true },
-        grade: { type: "varchar", nullable: false },
+        grade: { type: "varchar", nullable: true },
         parentId: { type: "int", nullable: true },
     },
     relations: {
@@ -39,7 +39,22 @@ export const Student = new EntitySchema({
         },
         results: {
             type: "one-to-many",
-            target: "Result",
+            target: "AssessmentResult",
+            inverseSide: "student",
+        },
+        enrollments: {
+            type: "one-to-many",
+            target: "StudentClass",
+            inverseSide: "student"
+        },
+        submissions: {
+            type: "one-to-many",
+            target: "AssignmentSubmission",
+            inverseSide: "student",
+        },
+        answers: {
+            type: "one-to-many",
+            target: "StudentAnswer",
             inverseSide: "student",
         },
     },

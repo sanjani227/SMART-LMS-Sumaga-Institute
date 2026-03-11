@@ -17,9 +17,14 @@ import { Parent } from "../model/parentModel.js";
 import { Student } from "../model/studentModel.js";
 import { Teacher } from "../model/teacherModel.js";
 import { Subject, Class } from "../model/academicModel.js";
-import { Attendance, Payment } from "../model/operationsModel.js";
+import { Attendance } from "../model/attendanceModel.js";
+import { Payment } from "../model/paymentModel.js";
 import { Assessment, Result, LearningMaterial } from "../model/learningKeyModel.js";
+import { Assignment, AssignmentSubmission } from "../model/assignmentModel.js";
+import { Assessment as NewAssessment, Question, StudentAnswer, AssessmentResult } from "../model/assessmentModel.js";
 import dotenv from "dotenv";
+import { StudentClass } from "../model/enrollmentModel.js";
+import { StudyMaterial } from "../model/studyMaterialModel.js";
 
 dotenv.config();
 
@@ -41,7 +46,15 @@ export const myDataSource = new DataSource({
     Payment,
     Assessment,
     Result,
-    LearningMaterial
+    LearningMaterial,
+    StudentClass,
+    StudyMaterial,
+    Assignment,
+    AssignmentSubmission,
+    NewAssessment,
+    Question,
+    StudentAnswer,
+    AssessmentResult,
   ],
   synchronize: true,
   logging: false

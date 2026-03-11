@@ -5,13 +5,13 @@ import { Filter, Download, BarChart3 } from 'lucide-react';
 export default function ReportsPage() {
   return (
     <div className="space-y-6">
-      <div className="mb-4">
+      <div className="mb-4 px-2 py-2">
         <h2 className="text-2xl font-bold text-gray-800">Reports</h2>
         <p className="text-gray-400 text-sm">Generate and view reports for attendance, performance, and financial data.</p>
       </div>
 
       {/* Filter Card */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mx-2">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Report Type */}
           <div className="space-y-2">
@@ -59,7 +59,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Report Preview */}
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mx-2">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-800">Report Preview</h3>
           <button className="flex items-center gap-2 text-orange-600 font-semibold px-4 py-2 hover:bg-orange-50 rounded-lg transition">

@@ -28,6 +28,7 @@ export const RegisterUser = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     const newUser = userRepo.create({
+      //id,
       firstName,
       lastName,
       email,
@@ -83,18 +84,27 @@ export const LoginUser = async (req, res) => {
     }
 
     const token = generateToken(
-      exisitingUser._id,
+      exisitingUser.id,
       exisitingUser.email,
       exisitingUser.userType
     );
 
-    res.status(200).json({
+    console.log("Generated token:", token);
+
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax", 
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+
+    return res.status(200).json({
       message: "User logged in successfully",
       token: token,
       data: {
         firstName: exisitingUser.firstName,
         lastName: exisitingUser.lastName,
-        id: exisitingUser._id,
+        id: exisitingUser.id,
         email: exisitingUser.email,
         userType: exisitingUser.userType,
       },

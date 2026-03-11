@@ -41,9 +41,12 @@ export default function LoginPage() {
           email: data.email,
           password: data.password,
         },
+        {withCredentials: true}
       );
 
       console.log(response.status);
+
+      const token = localStorage.setItem("TOKEN", response.data.token)
       const userLoggedName = response.data.data.firstName;
       const userLoggedEmail = response.data.data.email;
       const userLoggedUserType = response.data.data.userType || "guest"

@@ -8,6 +8,7 @@ export const Teacher = new EntitySchema({
         userId: { type: "int", nullable: false },
         fullName: { type: "varchar", nullable: false },
         specialization: { type: "varchar", nullable: true },
+        // subjectId: {type: "int",  nullable: true, }
     },
     relations: {
         user: {
@@ -22,5 +23,11 @@ export const Teacher = new EntitySchema({
             target: "Class",
             inverseSide: "teacher",
         },
+        subject: {
+            type: "one-to-one",
+            target: "Subject",
+            inverseSide: "teacher",
+            // joinColumn: {name: "subjectId"}
+        }
     },
 });

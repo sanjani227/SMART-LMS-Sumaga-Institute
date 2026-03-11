@@ -152,6 +152,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       path: "/dashboard/teacher/courses",
       role: ["teacher"],
     },
+    {
+      name: "Study Materials",
+      icon: <BookOpen size={20} />,
+      path: "/dashboard/teacher/study-materials",
+      role: ["teacher"],
+    },
 
     {
       name: "Child Progress",
@@ -193,7 +199,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   return (
 
-
+    
     <div className="flex min-h-screen">
       <div className="w-60 shrink-0 bg-gray-200 flex flex-col">
         {/* sidebar content */}
@@ -206,10 +212,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             return (
               <Link href={item.path} key={item.name} className="block">
                 <div
-                  className={`flex flex-row gap-4 transition ${isActive
+                  className={`flex flex-row gap-4 transition ${
+                    isActive
                       ? "bg-orange-200 text-orange-400 p-4"
                       : "text-gray-500 hover:bg-gray-50 p-4"
-                    }`}
+                  }`}
                 >
                   {item.icon}
                   {item.name}

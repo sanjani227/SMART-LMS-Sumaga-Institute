@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
+import { UserType } from '@/src/utils/enum';
 
 export function EditUserContent() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export function EditUserContent() {
   const [formData, setFormData] = useState({
     name: 'Sanjani',
     email: 'sanjanimapa@gmail.com',
-    role: 'Teacher',
+    UserType: 'Teacher',
     status: 'Active'
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,7 @@ export function EditUserContent() {
     setIsLoading(true);
     try {
       console.log('Updating user:', userId, formData);
-      router.push('/dashboard/users');
+      router.push('/dashboard/admin/users');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +84,7 @@ export function EditUserContent() {
             <label className="block text-sm font-bold text-gray-800 mb-2">Role</label>
             <select
               name="role"
-              value={formData.role}
+              value={formData.UserType}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
             >
@@ -102,8 +103,8 @@ export function EditUserContent() {
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
             >
-              <option>Active</option>
-              <option>Inactive</option>
+              <option value= "active">Active</option>
+              <option value= "inactive">Inactive</option>
             </select>
           </div>
 

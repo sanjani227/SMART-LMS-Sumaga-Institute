@@ -13,9 +13,7 @@ export const generateToken = (userId, email, userType) => {
 
   console.log(payload)
 
-  const token = jwt.sign(payload, jwtSecret, {
-    expiresIn: "7d",
-  });
+  const token = jwt.sign(payload, jwtSecret, { algorithm: "HS256", expiresIn: "7d" });
 
   return token;
 };

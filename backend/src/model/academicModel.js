@@ -30,6 +30,7 @@ export const Class = new EntitySchema({
             nullable: false
         },
         scheduleTime: { type: "time", nullable: false },
+        isDeleted: {type:"boolean" , nullable: false, default: false}
     },
     relations: {
         subject: {
@@ -55,6 +56,16 @@ export const Class = new EntitySchema({
             type: "one-to-many",
             target: "Assessment",
             inverseSide: "classSession",
+        },
+        assignments: {
+            type: "one-to-many",
+            target: "Assignment",
+            inverseSide: "class",
+        },
+        enrolledStudents: {
+            type: "one-to-many",
+            target: "StudentClass",
+            inverseSide: "class",
         },
         learningMaterials: {
             type: "one-to-many",

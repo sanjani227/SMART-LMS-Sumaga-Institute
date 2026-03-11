@@ -5,14 +5,42 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Bell, LogOut, User, Eye, Pencil, Trash2, Circle } from "lucide-react";
 import { UserContext, UserProvider } from "../../context/userContext";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 export default function DashboardPage() {
   const router = useRouter();
 
+  const [nofClasses, setNoOfClasses] = useState(0)
+
   const { name, userType } =
     useContext(UserContext) || ({ name: "GUEST", userType: "guest" } as const);
   const role = (userType || "guest").toLowerCase();
+
+  const getClasses = async () => {
+
+    // const token = localStorage.getItem("token")
+    const token = localStorage.getItem("TOKEN")
+     
+    const classes = await axios.get(
+      "http://localhost:3000/api/v1/teachers/classes",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      },
+    );
+
+
+    const noOfClasses = classes.data.data.classes.length
+    setNoOfClasses(noOfClasses)
+
+
+  };
+
+  useEffect(() => {
+    getClasses()
+  }, [])
 
   const announcements = [
     {
@@ -46,25 +74,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      {/* <div className="flex w-full justify-end bg-gray-100 gap-4 py-2 pr-4">
-        <button>
-          <div className="relative">
-            <Bell></Bell>
-            <Circle className="absolute -top-1 -right-1 size-2 bg-black rounded-2xl"></Circle>
-          </div>
-        </button>
-        <Image
-          src="/avatar.png"
-          alt="logged-in-avatar"
-          width={30}
-          height={30}
-        ></Image>
-
-        <h3> {name || "GUEST"} </h3>
-
-        <LogOut onClick={handleLogOut}></LogOut>
-      </div> */}
-
       <div className="flex flex-col w-full gap-4 pr-4">
         <section className="px-6 py-4">
           <h1 className="text-xl font-semibold ">Welcome {name || "Guest"}</h1>
@@ -98,7 +107,10 @@ export default function DashboardPage() {
 
             <div className="flex justify-evenly w-full gap-4 mx-2">
               {[1, 2].map((col) => (
-                <div key={col} className="border rounded-2xl w-full h-full gap-4 ">
+                <div
+                  key={col}
+                  className="border rounded-2xl w-full h-full gap-4 "
+                >
                   Recent Announcements
                   <div className="space-y-4">
                     {announcements.map((announcement) => (
@@ -177,10 +189,12 @@ export default function DashboardPage() {
                 <>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Classes today</p>
-                    <p className="text-lg font-semibold">3 sessions</p>
+                    <p className="text-lg font-semibold"> { nofClasses} sessions</p>
                   </div>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
-                    <p className="text-sm text-gray-500">Assignments to grade</p>
+                    <p className="text-sm text-gray-500">
+                      Assignments to grade
+                    </p>
                     <p className="text-lg font-semibold">12 pending</p>
                   </div>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
@@ -194,11 +208,15 @@ export default function DashboardPage() {
                 <>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Child progress</p>
-                    <p className="text-lg font-semibold">Latest report available</p>
+                    <p className="text-lg font-semibold">
+                      Latest report available
+                    </p>
                   </div>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Payments</p>
-                    <p className="text-lg font-semibold">Invoice #124 due soon</p>
+                    <p className="text-lg font-semibold">
+                      Invoice #124 due soon
+                    </p>
                   </div>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Attendance</p>
@@ -211,7 +229,9 @@ export default function DashboardPage() {
                 <>
                   <div className="bg-white border rounded-2xl p-4 shadow-sm col-span-1 sm:col-span-2 lg:col-span-3">
                     <p className="text-sm text-gray-500">Welcome</p>
-                    <p className="text-lg font-semibold">Explore announcements and updates.</p>
+                    <p className="text-lg font-semibold">
+                      Explore announcements and updates.
+                    </p>
                   </div>
                 </>
               )}
@@ -219,7 +239,9 @@ export default function DashboardPage() {
 
             {/* Announcements shared for all non-admin roles */}
             <div className="border rounded-2xl w-full h-full gap-4 bg-white shadow-sm">
-              <div className="px-4 py-3 font-semibold">Latest announcements</div>
+              <div className="px-4 py-3 font-semibold">
+                Latest announcements
+              </div>
               <div className="space-y-4 p-4">
                 {announcements.map((announcement) => (
                   <div

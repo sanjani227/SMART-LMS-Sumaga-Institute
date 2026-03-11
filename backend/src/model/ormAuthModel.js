@@ -10,6 +10,7 @@ export const User = new EntitySchema({
     lastName: { type: "varchar", nullable: false },
     email: { type: "varchar", nullable: false, unique: true },
     password: { type: "varchar", nullable: false },
+    isDeleted: {type: "boolean", nullable: false, default: false},
     userType: {
       type: "enum",
       enum: Object.values(UserType),

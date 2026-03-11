@@ -4,9 +4,9 @@ import { ArrowUpRight, ArrowDownRight, Wallet, Download, PieChart } from 'lucide
 
 export default function IncomeOverview() {
   const monthlyData = [
-    { month: 'January', income: 'Rs12,000', expenses: 'RS10,000', profit: 'Rs2,000' },
-    { month: 'February', income: 'Rs12,500', expenses: 'RS9,800', profit: 'RS2,700' },
-    { month: 'March', income: 'Rs13,000', expenses: 'RS11,000', profit: 'RS2,000' },
+    { month: 'January', income: '$12,000', expenses: '$10,000', profit: '$2,000' },
+    { month: 'February', income: '$12,500', expenses: '$9,800', profit: '$2,700' },
+    { month: 'March', income: '$13,000', expenses: '$11,000', profit: '$2,000' },
   ];
 
   return (
