@@ -84,6 +84,7 @@ export const getTeacherAssignments = async (req, res) => {
       where: { userId },
       relations: [
         "classes",
+        "classes.subject",
         "classes.assignments",
         "classes.assignments.class",
         "classes.assignments.class.subject",
@@ -107,7 +108,7 @@ export const getTeacherAssignments = async (req, res) => {
           assignments.push({
             ...assignment,
             submissionCount: assignment.submissions.length,
-            class: cls,
+            class: assignment.class || cls,
           });
         });
       }

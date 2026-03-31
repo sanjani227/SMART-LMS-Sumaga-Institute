@@ -31,14 +31,10 @@ export default function StudentMaterials() {
   const fetchStudyMaterials = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken");
-      
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/students/materials`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 

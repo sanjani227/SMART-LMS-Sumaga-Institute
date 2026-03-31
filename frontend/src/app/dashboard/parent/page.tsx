@@ -24,6 +24,7 @@ export default function ParentDashboard() {
   const [children, setChildren] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const defaultChildId = children[0]?.studentId;
 
   useEffect(() => {
     fetchParentProfile();
@@ -32,14 +33,10 @@ export default function ParentDashboard() {
 
   const fetchParentProfile = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/profile`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -55,14 +52,11 @@ export default function ParentDashboard() {
   const fetchChildren = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken");
-      
+
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/children`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -197,7 +191,7 @@ export default function ParentDashboard() {
                   <h4 className="font-medium text-gray-800">{child.fullName}</h4>
                   <p className="text-sm text-gray-500">Grade {child.grade}</p>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                <div className="w-10 h-10 bg-linear-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
                   {child.fullName.charAt(0)}
                 </div>
               </div>
@@ -247,7 +241,11 @@ export default function ParentDashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link 
-            href="/dashboard/parent/child-attendance"
+            href={
+              defaultChildId
+                ? `/dashboard/parent/child-attendance?studentId=${defaultChildId}`
+                : "/dashboard/parent/child-attendance"
+            }
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Calendar className="w-8 h-8 text-blue-600 mb-2" />
@@ -256,7 +254,11 @@ export default function ParentDashboard() {
           </Link>
 
           <Link 
-            href="/dashboard/parent/child-payments"
+            href={
+              defaultChildId
+                ? `/dashboard/parent/child-payments?studentId=${defaultChildId}`
+                : "/dashboard/parent/child-payments"
+            }
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <CreditCard className="w-8 h-8 text-green-600 mb-2" />
@@ -265,7 +267,11 @@ export default function ParentDashboard() {
           </Link>
 
           <Link 
-            href="/dashboard/parent/child-progress"
+            href={
+              defaultChildId
+                ? `/dashboard/parent/child-progress?studentId=${defaultChildId}`
+                : "/dashboard/parent/child-progress"
+            }
             className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <TrendingUp className="w-8 h-8 text-purple-600 mb-2" />

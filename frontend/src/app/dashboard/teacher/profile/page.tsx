@@ -38,9 +38,7 @@ export default function TeacherProfile() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/profile`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -84,9 +82,7 @@ export default function TeacherProfile() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/specialization`,
         { specialization: selectedSubject },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 

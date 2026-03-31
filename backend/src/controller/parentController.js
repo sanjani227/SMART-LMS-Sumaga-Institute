@@ -73,6 +73,120 @@ export const getChildren = async (req, res) => {
   }
 };
 
+// Parent settings summary (linked + available children)
+export const getParentSettings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const q = (req.query.q || "").toString().trim().toLowerCase();
+
+    const parent = await parentRepo.findOne({
+      where: { userId },
+      relations: ["students", "students.user", "user"],
+    });
+
+    if (!parent) {
+      return res.status(404).json({
+        code: 404,
+        message: "Parent profile not found",
+      });
+    }
+
+    let availableStudents = await studentRepo.find({
+      where: { parentId: null },
+      relations: ["user"],
+      order: { fullName: "ASC" },
+    });
+
+    if (q) {
+      availableStudents = availableStudents.filter((student) => {
+        const studentName = (student.fullName || "").toLowerCase();
+        const studentEmail = (student.user?.email || "").toLowerCase();
+        return studentName.includes(q) || studentEmail.includes(q);
+      });
+    }
+
+    return res.json({
+      code: 200,
+      data: {
+        parent: {
+          parentId: parent.parentId,
+          fullName: parent.fullName,
+          email: parent.user?.email,
+          contact: parent.contact,
+        },
+        linkedStudents: parent.students || [],
+        availableStudents,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal server error",
+    });
+  }
+};
+
+// Link a student to the currently logged-in parent
+export const linkChildToParent = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { studentId } = req.body;
+
+    if (!studentId) {
+      return res.status(400).json({
+        code: 400,
+        message: "studentId is required",
+      });
+    }
+
+    const parent = await parentRepo.findOne({
+      where: { userId },
+    });
+
+    if (!parent) {
+      return res.status(404).json({
+        code: 404,
+        message: "Parent profile not found",
+      });
+    }
+
+    const student = await studentRepo.findOne({
+      where: { studentId: parseInt(studentId) },
+      relations: ["user"],
+    });
+
+    if (!student) {
+      return res.status(404).json({
+        code: 404,
+        message: "Student not found",
+      });
+    }
+
+    if (student.parentId && student.parentId !== parent.parentId) {
+      return res.status(409).json({
+        code: 409,
+        message: "This student is already linked to another parent",
+      });
+    }
+
+    student.parentId = parent.parentId;
+    await studentRepo.save(student);
+
+    return res.json({
+      code: 200,
+      message: "Child linked successfully",
+      data: student,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal server error",
+    });
+  }
+};
+
 // Get child's attendance
 export const getChildAttendance = async (req, res) => {
   try {

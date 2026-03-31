@@ -12,7 +12,7 @@ interface Assignment {
   submissionCount: number;
   class: {
     classId: number;
-    subject: {
+    subject?: {
       subjectName: string;
       gradeLevel: string;
     };
@@ -24,7 +24,7 @@ interface Assignment {
 
 interface Class {
   classId: number;
-  subject: {
+  subject?: {
     subjectId: number;
     subjectName: string;
     gradeLevel: string;
@@ -61,9 +61,7 @@ export default function TeacherAssignments() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -87,9 +85,7 @@ export default function TeacherAssignments() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -114,9 +110,7 @@ export default function TeacherAssignments() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments`,
         newAssignment,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -259,7 +253,10 @@ export default function TeacherAssignments() {
                       {assignment.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      {assignment.class.subject.subjectName} - Grade {assignment.class.subject.gradeLevel}
+                        {assignment.class?.subject?.subjectName || "Subject not assigned"}
+                        {assignment.class?.subject?.gradeLevel
+                          ? ` - Grade ${assignment.class.subject.gradeLevel}`
+                          : ""}
                     </p>
                     {assignment.description && (
                       <p className="text-sm text-gray-500 line-clamp-2">
@@ -337,7 +334,9 @@ export default function TeacherAssignments() {
                   <option value="">Select a class...</option>
                   {teacherClasses.map((cls) => (
                     <option key={cls.classId} value={cls.classId}>
-                      {cls.subject.subjectName} (Grade {cls.subject.gradeLevel}) - {cls.scheduleDay} {cls.scheduleTime}
+                      {cls.subject?.subjectName || "Subject not assigned"}
+                      {cls.subject?.gradeLevel ? ` (Grade ${cls.subject.gradeLevel})` : ""}
+                      {` - ${cls.scheduleDay} ${cls.scheduleTime}`}
                     </option>
                   ))}
                 </select>

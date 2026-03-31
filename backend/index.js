@@ -17,8 +17,34 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // connectToDB();
-await myDataSource.initialize()
+
+await myDataSource.initialize();
 console.log('✅ Database connected successfully to:', process.env.DB_NAME || 'sumaga_lms');
+
+// --- SYNC DB AT STARTUP ---
+try {
+  // Student sync
+  const { syncStudentUser } = await import('./src/controller/studentController.js');
+  await syncStudentUser(
+    { user: { id: null } }, // dummy req
+    { json: () => {}, status: () => ({ json: () => {} }) } // dummy res
+  );
+  // Teacher sync
+  const { autoUpdateTeacherFromAllUsers } = await import('./src/controller/teacherController.js');
+  await autoUpdateTeacherFromAllUsers(
+    { user: { id: null } },
+    { json: () => {}, status: () => ({ json: () => {} }) }
+  );
+  // Parent sync
+  const { syncParentUser } = await import('./src/controller/parentController.js');
+  await syncParentUser(
+    { user: { id: null } },
+    { json: () => {}, status: () => ({ json: () => {} }) }
+  );
+  console.log('✅ Database sync complete');
+} catch (err) {
+  console.error('❌ Database sync failed:', err);
+}
 
 
 app.use(

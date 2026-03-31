@@ -63,9 +63,7 @@ export default function TeacherAttendance() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -88,9 +86,7 @@ export default function TeacherAttendance() {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes/${selectedClass.classId}/students?date=${selectedDate}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 
@@ -134,9 +130,7 @@ export default function TeacherAttendance() {
           attendanceData: attendanceArray,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         }
       );
 

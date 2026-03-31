@@ -126,6 +126,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       path: "/dashboard/student/progress",
       role: ["student"],
     },
+    {
+      name: "Settings",
+      icon: <UserCircle size={20} />,
+      path: "/dashboard/student/settings",
+      role: ["student"],
+    },
 
     // teacher
     {
@@ -175,6 +181,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       name: "Payments",
       icon: <Wallet size={20} />,
       path: "/dashboard/parent/child-payments",
+      role: ["parent"],
+    },
+    {
+      name: "Settings",
+      icon: <UserCircle size={20} />,
+      path: "/dashboard/parent/settings",
       role: ["parent"],
     },
 

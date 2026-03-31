@@ -2,13 +2,16 @@ import express from 'express';
 import { 
   syncStudentUser,
   getStudentClasses,
+  getAvailableClasses,
   getStudentStudyMaterials,
   getStudentAssignments,
   getStudentAssessments,
   getStudentAttendance,
   getStudentPayments,
   getStudentProgress,
-  enrollInClass
+  enrollInClass,
+  getStudentSettings,
+  updateStudentParent,
 } from '../controller/studentController.js';
 import { authenticate, requireStudent } from '../middleware/authentication.js';
 
@@ -19,6 +22,9 @@ studentRoute.get("/sync", syncStudentUser);
 
 // Get student's classes (protected)
 studentRoute.get("/classes", authenticate, requireStudent, getStudentClasses);
+
+// Get classes available for enrollment (protected)
+studentRoute.get("/available-classes", authenticate, requireStudent, getAvailableClasses);
 
 // Get student's study materials (protected)
 studentRoute.get("/materials", authenticate, requireStudent, getStudentStudyMaterials);
@@ -40,5 +46,11 @@ studentRoute.get("/progress", authenticate, requireStudent, getStudentProgress);
 
 // Enroll in class (protected)
 studentRoute.post("/enroll", authenticate, requireStudent, enrollInClass);
+
+// Student settings (protected)
+studentRoute.get("/settings", authenticate, requireStudent, getStudentSettings);
+
+// Update student's parent (protected)
+studentRoute.put("/parent", authenticate, requireStudent, updateStudentParent);
 
 export default studentRoute;

@@ -28,7 +28,7 @@ export const RegisterUser = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     const newUser = userRepo.create({
-      //id,
+      id,
       firstName,
       lastName,
       email,

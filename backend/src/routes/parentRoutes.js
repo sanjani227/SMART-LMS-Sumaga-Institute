@@ -2,6 +2,8 @@ import express from 'express';
 import { 
   getParentProfile, 
   getChildren, 
+  getParentSettings,
+  linkChildToParent,
   getChildAttendance, 
   getChildPayments, 
   getChildProgress,
@@ -19,6 +21,12 @@ parentRoute.get("/profile", authenticate, requireParent, getParentProfile);
 
 // Get children list (protected)
 parentRoute.get("/children", authenticate, requireParent, getChildren);
+
+// Parent settings (protected)
+parentRoute.get("/settings", authenticate, requireParent, getParentSettings);
+
+// Link child to parent (protected)
+parentRoute.post("/children/link", authenticate, requireParent, linkChildToParent);
 
 // Get child's attendance (protected)
 parentRoute.get("/children/:studentId/attendance", authenticate, requireParent, getChildAttendance);
