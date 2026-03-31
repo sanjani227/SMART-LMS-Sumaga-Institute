@@ -1,8 +1,8 @@
 export default function StudentPayments() {
     const invoices = [
-        { label: "Tuition - March", amount: "$450", status: "Paid" },
-        { label: "Lab Fee", amount: "$60", status: "Pending" },
-        { label: "Library", amount: "$20", status: "Paid" },
+        { label: "Tuition - March", amount: "Rs. 450", status: "Paid" },
+        { label: "Lab Fee", amount: "Rs. 60", status: "Pending" },
+        { label: "Library", amount: "Rs. 20", status: "Paid" },
     ];
 
     return (
@@ -15,11 +15,11 @@ export default function StudentPayments() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Total due</p>
-                    <p className="text-2xl font-bold">$60</p>
+                    <p className="text-2xl font-bold">Rs. 60</p>
                 </div>
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Paid this month</p>
-                    <p className="text-2xl font-bold">$470</p>
+                    <p className="text-2xl font-bold">Rs. 470</p>
                 </div>
                 <div className="bg-white border rounded-xl p-4 shadow-sm">
                     <p className="text-sm text-gray-500">Pending invoices</p>

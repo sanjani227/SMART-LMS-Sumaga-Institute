@@ -35,6 +35,14 @@ export const User = new EntitySchema({
       type: "datetime",
       nullable: true,
     },
+    notifications: {
+      type: "simple-json",
+      nullable: true,
+    },
+    systemPreferences: {
+      type: "simple-json",
+      nullable: true,
+    },
   },
   relations: {
     studentProfile: {
