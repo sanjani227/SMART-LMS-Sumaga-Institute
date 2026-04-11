@@ -9,8 +9,12 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  QrCode,
+  X,
+  Download
 } from "lucide-react";
 import axios from "axios";
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ManageUsersPage() {
   const router = useRouter();
@@ -19,6 +23,7 @@ export default function ManageUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [qrModalUser, setQrModalUser] = useState<any>(null);
 
   const getAllUsers = async () => {
     try {
@@ -54,22 +59,22 @@ export default function ManageUsersPage() {
   console.log("paginated user", paginatedUsers);
 
   const getRoleStyle = (role: string) => {
-    switch (role) {
-      case "Teacher":
+    switch (role?.toLowerCase()) {
+      case "teacher":
         return "bg-blue-100 text-blue-600";
-      case "Student":
+      case "student":
         return "bg-indigo-100 text-indigo-600";
-      case "Parent":
+      case "parent":
         return "bg-purple-100 text-purple-600";
       default:
         return "bg-gray-100 text-gray-600";
     }
   };
 
-  const getStatusStyle = (status: string) => {
-    return (status = true
+  const getStatusStyle = (status: boolean) => {
+    return status === true
       ? "bg-green-100 text-green-600"
-      : "bg-red-100 text-red-600");
+      : "bg-red-100 text-red-600";
   };
 
   const handleAddUser = () => {
@@ -138,9 +143,9 @@ export default function ManageUsersPage() {
             className="bg-gray-50 border-none rounded-lg px-4 py-2 text-sm text-gray-600 outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer"
           >
             <option>All Roles</option>
-            <option>Teacher</option>
-            <option>Student</option>
-            <option>Parent</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+            <option value="parent">Parent</option>
           </select>
         </div>
 
@@ -169,7 +174,7 @@ export default function ManageUsersPage() {
                   <td className="px-8 py-5">
                     <div className="flex justify-center">
                       <span
-                        className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase ${getRoleStyle(user.role)}`}
+                        className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase ${getRoleStyle(user.userType)}`}
                       >
                         {user.userType}
                       </span>
@@ -186,6 +191,15 @@ export default function ManageUsersPage() {
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex justify-end gap-3 text-blue-500">
+                      {user.userType?.toLowerCase() === 'student' && (
+                        <button
+                          onClick={() => setQrModalUser(user)}
+                          className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition"
+                          title="Generate QR Code for Student"
+                        >
+                          <QrCode size={18} />
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEditUser(user.id)}
                         className="p-1 hover:bg-blue-50 rounded-md transition"
@@ -237,6 +251,60 @@ export default function ManageUsersPage() {
           </div>
         </div>
       </div>
+
+      {/* QR Code Modal for Students */}
+      {qrModalUser && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="p-6 text-center border-b border-gray-100 relative">
+              <button 
+                onClick={() => setQrModalUser(null)} 
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition bg-gray-50 rounded-full p-2"
+              >
+                <X size={20} />
+              </button>
+              <h3 className="text-xl font-bold text-gray-800">Student Tag</h3>
+              <p className="text-sm text-gray-500 mt-1">{qrModalUser.firstName}</p>
+            </div>
+            <div className="p-8 flex flex-col items-center bg-gray-50">
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center mb-6">
+                <QRCodeSVG 
+                  id={`qr-code-${qrModalUser.id}`} 
+                  value={JSON.stringify({ id: qrModalUser.id, email: qrModalUser.email, role: 'student' })} 
+                  size={200} 
+                  level="H" 
+                  includeMargin={true}
+                />
+              </div>
+              <button 
+                onClick={() => {
+                  const svg = document.getElementById(`qr-code-${qrModalUser.id}`);
+                  if (svg) {
+                    const svgData = new XMLSerializer().serializeToString(svg);
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    const img = new Image();
+                    img.onload = () => {
+                      canvas.width = img.width;
+                      canvas.height = img.height;
+                      ctx?.drawImage(img, 0, 0);
+                      const pngFile = canvas.toDataURL("image/png");
+                      const downloadLink = document.createElement("a");
+                      downloadLink.download = `Student_QR_${qrModalUser.id}.png`;
+                      downloadLink.href = `${pngFile}`;
+                      downloadLink.click();
+                    };
+                    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+                  }
+                }}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition"
+              >
+                <Download size={18} /> Download QR Code
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

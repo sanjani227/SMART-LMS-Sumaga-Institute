@@ -237,3 +237,81 @@ export const ChangePassword = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const getMe = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Exclude password and sensitive info
+    const { password, otp, otpExpires, ...userData } = user;
+    return res.status(200).json({ code: 200, data: userData });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, email } = req.body;
+    const userId = req.user.id;
+
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    
+    await userRepo.save(user);
+
+    return res.status(200).json({ code: 200, message: "Profile updated successfully", data: user });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updatePreferences = async (req, res) => {
+  try {
+    const { notifications, systemPreferences } = req.body;
+    const userId = req.user.id;
+
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (notifications) user.notifications = notifications;
+    if (systemPreferences) user.systemPreferences = systemPreferences;
+    
+    await userRepo.save(user);
+
+    return res.status(200).json({ code: 200, message: "Preferences updated successfully", data: user });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Both current and new passwords are required" });
+    }
+
+    const user = await userRepo.findOne({ where: { id: userId } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await bcryptjs.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: "Incorrect current password" });
+
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await userRepo.save(user);
+
+    return res.status(200).json({ code: 200, message: "Password updated securely" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};

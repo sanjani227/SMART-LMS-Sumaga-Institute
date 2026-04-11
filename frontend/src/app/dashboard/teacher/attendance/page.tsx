@@ -58,10 +58,10 @@ export default function TeacherAttendance() {
 
   const fetchTeacherClasses = async () => {
     try {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
+        `http://localhost:3000/api/v1/teachers/classes`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,10 +83,10 @@ export default function TeacherAttendance() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes/${selectedClass.classId}/students?date=${selectedDate}`,
+        `http://localhost:3000/api/v1/teachers/classes/${selectedClass.classId}/students?date=${selectedDate}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -113,7 +113,7 @@ export default function TeacherAttendance() {
 
     try {
       setSaving(true);
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("TOKEN");
 
       const attendanceArray = attendanceData.students.map(student => {
         const change = attendanceChanges[student.studentId];
@@ -127,7 +127,7 @@ export default function TeacherAttendance() {
       });
 
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/attendance`,
+        `http://localhost:3000/api/v1/teachers/attendance`,
         {
           classId: selectedClass.classId,
           date: selectedDate,

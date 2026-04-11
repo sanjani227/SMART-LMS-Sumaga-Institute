@@ -11,6 +11,7 @@ import {
   BookOpen,
   CheckCircle,
   Users,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -18,6 +19,17 @@ export default function ManageClassesPage() {
   const [allClasses, setClasses] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([])
   const [activeClasses, setActiveClasses] = useState(0)
+
+  // Add Class Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [newClassDetails, setNewClassDetails] = useState({
+    teacherId: "",
+    scheduleDay: "Monday",
+    scheduleTime: "08:00 AM",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const getAllClasses = async () => {
     try {
@@ -53,66 +65,54 @@ export default function ManageClassesPage() {
     }
   };
 
-
+  const getTeachers = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/teachers/getAllTeacher",
+        { withCredentials: true }
+      );
+      setTeachers(response.data.data);
+    } catch (error) {
+      console.error("Error fetching teachers:", error);
+    }
+  };
 
   useEffect(() => {
     getAllClasses();
-    getAllUsers()
+    getAllUsers();
+    getTeachers();
   }, []);
 
-  // const classes = allClasses.map((e) => e)
-  // console.log(classes)
-
-  // const classes = [
-  //   {
-  //     name: "Mathematics",
-  //     grade: "Grade 8",
-  //     teacher: "Nilantha",
-  //     students: 32,
-  //     schedule: "Monday, Wednesday, Friday - 9:00 AM",
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "Sinhala",
-  //     grade: "Grade 9",
-  //     teacher: "Nimal",
-  //     students: 28,
-  //     schedule: "Tuesday, Thursday - 11:00 AM",
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "World History",
-  //     grade: "Grade 10",
-  //     teacher: "Kamal",
-  //     students: 25,
-  //     schedule: "Monday, Wednesday - 1:00 PM",
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "English Literature",
-  //     grade: "Grade 8",
-  //     teacher: "Ashoka",
-  //     students: 30,
-  //     schedule: "Tuesday, Thursday - 9:00 AM",
-  //     status: "Active",
-  //   },
-  //   {
-  //     name: "Physics",
-  //     grade: "Grade 12",
-  //     teacher: "Sumudu",
-  //     students: 22,
-  //     schedule: "Monday, Wednesday, Friday - 11:00 AM",
-  //     status: "Inactive",
-  //   },
-  //   {
-  //     name: "Science",
-  //     grade: "Grade 7",
-  //     teacher: "Sugath",
-  //     students: 35,
-  //     schedule: "Monday, Wednesday, Friday - 10:00 AM",
-  //     status: "Active",
-  //   },
-  // ];
+  const handleCreateClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClassDetails.teacherId || !newClassDetails.scheduleDay || !newClassDetails.scheduleTime) {
+      setSubmitError("Please fill out all fields.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitError("");
+    
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/v1/classes/createClass",
+        newClassDetails,
+        { withCredentials: true }
+      );
+      
+      if (res.data.code === 200) {
+        setShowAddModal(false);
+        setNewClassDetails({ teacherId: "", scheduleDay: "Monday", scheduleTime: "08:00 AM" });
+        getAllClasses(); // refresh list
+      } else {
+        setSubmitError(res.data.message || "Failed to create class.");
+      }
+    } catch (error: any) {
+      setSubmitError(error.response?.data?.message || "An error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const stats = [
     {
@@ -143,7 +143,10 @@ export default function ManageClassesPage() {
       {/* Header */}
       <div className="flex justify-between items-center px-2 py-2">
         <h2 className="text-2xl font-bold text-gray-800">Manage Classes</h2>
-        <button className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-semibold shadow-sm transition">
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-semibold shadow-sm transition"
+        >
           <Plus size={20} />
           Add Class
         </button>
@@ -212,19 +215,19 @@ export default function ManageClassesPage() {
                         <BookOpen className="text-orange-600" size={18} />
                       </div>
                       <span className="font-semibold text-gray-800">
-                        {cls.subject.subjectName}
+                        {cls.subject?.subjectName || 'Unknown Subject'}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{cls.subject.gradeLevel}</td>
-                  <td className="px-6 py-4 text-gray-600">{cls.teacher.fullName}</td>
+                  <td className="px-6 py-4 text-gray-600">{cls.subject?.gradeLevel || 'N/A'}</td>
+                  <td className="px-6 py-4 text-gray-600">{cls.teacher?.fullName || 'Unassigned'}</td>
                   <td className="px-6 py-4">
                     <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold">
-                      {cls.students} Students
+                      {cls.students || 0} Students
                     </span>
                   </td>
                   <td className="px-6 py-4 text-gray-600 text-sm">
-                    {cls.scheduleDay}
+                    {cls.scheduleDay} <span className="opacity-50">| {cls.scheduleTime}</span>
                   </td>
                   <td className="px-6 py-4">
                     <span
@@ -249,13 +252,21 @@ export default function ManageClassesPage() {
                   </td>
                 </tr>
               ))}
+              
+              {allClasses.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-gray-400 font-medium">
+                    No classes available. Add a new class.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-100 flex justify-between items-center">
-          <p className="text-sm text-gray-500">Showing 1 to 6 of 6 classes</p>
+          <p className="text-sm text-gray-500">Showing {allClasses.length > 0 ? '1' : '0'} to {allClasses.length} of {allClasses.length} classes</p>
           <div className="flex gap-2">
             <button className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600">
               <ChevronLeft size={18} />
@@ -269,6 +280,80 @@ export default function ManageClassesPage() {
           </div>
         </div>
       </div>
+
+      {/* Add Class Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-xl">
+            <button 
+              onClick={() => setShowAddModal(false)} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 p-2 rounded-full transition"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Create New Class</h3>
+            
+            <form onSubmit={handleCreateClass} className="space-y-4">
+              {submitError && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium">
+                  {submitError}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Assign Teacher</label>
+                <select 
+                  value={newClassDetails.teacherId}
+                  onChange={(e) => setNewClassDetails({...newClassDetails, teacherId: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  <option value="" disabled>Select a teacher...</option>
+                  {teachers?.map((t: any) => (
+                    <option key={t.teacherId} value={t.teacherId}>
+                      {t.fullName} ({t.specialization || "No Specific Subject"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Schedule Day</label>
+                <select 
+                  value={newClassDetails.scheduleDay}
+                  onChange={(e) => setNewClassDetails({...newClassDetails, scheduleDay: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Schedule Time</label>
+                <input 
+                  type="time" 
+                  value={newClassDetails.scheduleTime}
+                  onChange={(e) => setNewClassDetails({...newClassDetails, scheduleTime: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition mt-4 flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? <><BookOpen size={18} className="animate-spin" /> Creating...</> : "Create Class"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
