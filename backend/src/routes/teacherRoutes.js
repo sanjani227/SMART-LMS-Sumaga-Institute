@@ -24,6 +24,10 @@ import {
   getClassAttendanceHistory,
   getTeacherAttendanceSummary,
 } from "../controller/attendanceController.js";
+import {
+  createAssessment,
+  getTeacherAssessments
+} from "../controller/assessmentController.js";
 import { authenticate, requireTeacher } from "../middleware/authentication.js";
 import multer from "multer";
 import path from "path";
@@ -62,6 +66,10 @@ teacherRoute.post("/assignments", authenticate, requireTeacher, createAssignment
 teacherRoute.get("/assignments", authenticate, requireTeacher, getTeacherAssignments);
 teacherRoute.get("/assignments/:assignmentId/submissions", authenticate, requireTeacher, getAssignmentSubmissions);
 teacherRoute.put("/assignments/submissions/:submissionId/grade", authenticate, requireTeacher, gradeAssignment);
+
+// Quiz / Assessment routes
+teacherRoute.post("/quizzes", authenticate, requireTeacher, createAssessment);
+teacherRoute.get("/quizzes", authenticate, requireTeacher, getTeacherAssessments);
 
 // Attendance routes
 teacherRoute.get("/classes/:classId/students", authenticate, requireTeacher, getStudentsForAttendance);

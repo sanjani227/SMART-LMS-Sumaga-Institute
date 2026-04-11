@@ -378,3 +378,75 @@ export const syncParentUser = async (req, res) => {
     });
   }
 };
+
+// Link a student to a parent
+export const linkStudent = async (req, res) => {
+  try {
+    const parentUserId = req.user.id;
+    const { studentEmail } = req.body;
+
+    if (!studentEmail) {
+      return res.status(400).json({
+        code: 400,
+        message: "Student email is required",
+      });
+    }
+
+    // Find parent profile
+    const parent = await parentRepo.findOne({
+      where: { userId: parentUserId },
+    });
+
+    if (!parent) {
+      return res.status(404).json({
+        code: 404,
+        message: "Parent profile not found. Please sync your profile first.",
+      });
+    }
+
+    // Find student by email
+    const studentUser = await userRepo.findOne({
+      where: { email: studentEmail, userType: "student" },
+      relations: ["studentProfile"],
+    });
+
+    if (!studentUser || !studentUser.studentProfile) {
+      return res.status(404).json({
+        code: 404,
+        message: "Student not found with that email address",
+      });
+    }
+
+    const student = studentUser.studentProfile;
+
+    // Check if already linked
+    if (student.parentId === parent.parentId) {
+       return res.status(400).json({
+           code: 400,
+           message: "This student is already linked to your account",
+       });
+    }
+
+    // Update student's parentId
+    await studentRepo.update(
+      { studentId: student.studentId },
+      { parentId: parent.parentId }
+    );
+
+    return res.json({
+      code: 200,
+      message: "Student linked successfully",
+      data: {
+        studentId: student.studentId,
+        fullName: student.fullName,
+      }
+    });
+    
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      code: 500,
+      message: "Internal server error",
+    });
+  }
+};

@@ -160,11 +160,23 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     },
     {
       name: "Study Materials",
-      icon: <BookOpen size={20} />,
-      path: "/dashboard/teacher/study-materials",
+      icon: <Layers size={20} />,
+      path: "/dashboard/teacher/materials",
+      role: ["teacher"],
+    },
+    {
+      name: "Profile",
+      icon: <UserCircle size={20} />,
+      path: "/dashboard/teacher/profile",
       role: ["teacher"],
     },
 
+    {
+      name: "Profile & Sync",
+      icon: <UserCircle size={20} />,
+      path: "/dashboard/parent/profile",
+      role: ["parent"],
+    },
     {
       name: "Child Progress",
       icon: <TrendingUp size={20} />,

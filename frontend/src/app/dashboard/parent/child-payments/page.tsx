@@ -128,10 +128,81 @@ export default function ChildPayments() {
     }
 
     return (
-        <div className="p-6 space-y-4">
-            <div>
-                <h2 className="text-xl font-semibold text-gray-800">Payments</h2>
-                <p className="text-sm text-gray-500">Your child's school invoices.</p>
+      <div className="p-6">
+        <div className="bg-white p-10 rounded-2xl border text-center">
+          <User className="mx-auto text-gray-300 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Children Found</h3>
+          <p className="text-gray-500">
+            We could not find any students linked to your account. Please contact the administration or ensure your profile is fully synced.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate stats
+  const totalPaid = paymentData
+    .filter(p => p.status.toLowerCase() === 'completed')
+    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    
+  const totalPending = paymentData
+    .filter(p => p.status.toLowerCase() === 'pending')
+    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+  return (
+    <div className="p-6 space-y-6">
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Payments & Fees</h1>
+          <p className="text-sm text-gray-500">Review your child's payment history and pending dues</p>
+        </div>
+
+        <div className="w-full md:w-auto min-w-[250px]">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Child
+          </label>
+          <select
+            value={selectedChild}
+            onChange={(e) => setSelectedChild(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none bg-white"
+          >
+            {children.map((child) => (
+              <option key={child.studentId} value={child.studentId}>
+                {child.fullName} - Grade {child.grade}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {fetchingPayments ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        </div>
+      ) : paymentData.length === 0 ? (
+        <div className="bg-white p-10 rounded-2xl border text-center">
+          <Wallet className="mx-auto text-gray-300 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Invoices Yet</h3>
+          <p className="text-gray-500">
+            There are no payment records or pending invoices for this student.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Summary Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500 font-medium mb-1">Total Paid</p>
+                <p className="text-3xl font-bold text-gray-800">
+                  Rs. {totalPaid.toLocaleString()}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                <CheckCircle2 size={24} />
+              </div>
             </div>
 
             <div className="bg-white border rounded-xl p-4">

@@ -121,11 +121,88 @@ export default function ChildAttendancePage() {
     }
 
     return (
-        <div className="p-6 space-y-4">
-            <div>
-                <h2 className="text-xl font-semibold text-gray-800">Attendance</h2>
-                <p className="text-sm text-gray-500">Your child's recent attendance.</p>
+      <div className="p-6">
+        <div className="bg-white p-10 rounded-2xl border text-center">
+          <User className="mx-auto text-gray-300 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Children Found</h3>
+          <p className="text-gray-500">
+            We could not find any students linked to your account. Please contact the administration or ensure your profile is fully synced.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate stats
+  const totalDays = attendanceData.length;
+  const presentDays = attendanceData.filter(a => a.status.toLowerCase() === 'present').length;
+  const lateDays = attendanceData.filter(a => a.status.toLowerCase() === 'late').length;
+  const absentDays = attendanceData.filter(a => a.status.toLowerCase() === 'absent').length;
+  const attendancePercentage = totalDays > 0 ? Math.round(((presentDays + (lateDays * 0.5)) / totalDays) * 100) : 0;
+
+  return (
+    <div className="p-6 space-y-6">
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Child Attendance</h1>
+          <p className="text-sm text-gray-500">Monitor your child's daily class attendance</p>
+        </div>
+
+        <div className="w-full md:w-auto min-w-[250px]">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Child
+          </label>
+          <select
+            value={selectedChild}
+            onChange={(e) => setSelectedChild(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none bg-white"
+          >
+            {children.map((child) => (
+              <option key={child.studentId} value={child.studentId}>
+                {child.fullName} - Grade {child.grade}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {fetchingAttendance ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        </div>
+      ) : attendanceData.length === 0 ? (
+        <div className="bg-white p-10 rounded-2xl border text-center">
+          <Calendar className="mx-auto text-gray-300 mb-4" size={48} />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Records Yet</h3>
+          <p className="text-gray-500">
+            There are no attendance records available for this student yet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Summary Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-2xl border shadow-sm text-center">
+              <p className="text-sm text-gray-500 font-medium mb-1">Overall Rate</p>
+              <p className={`text-2xl font-bold ${attendancePercentage >= 80 ? 'text-green-600' : 'text-orange-600'}`}>
+                {attendancePercentage}%
+              </p>
             </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm text-center">
+              <p className="text-sm text-gray-500 font-medium mb-1">Present</p>
+              <p className="text-2xl font-bold text-gray-800">{presentDays}</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm text-center">
+              <p className="text-sm text-gray-500 font-medium mb-1">Late</p>
+              <p className="text-2xl font-bold text-gray-800">{lateDays}</p>
+            </div>
+            <div className="bg-white p-5 rounded-2xl border shadow-sm text-center">
+              <p className="text-sm text-gray-500 font-medium mb-1">Absent</p>
+              <p className="text-2xl font-bold text-gray-800">{absentDays}</p>
+            </div>
+          </div>
 
             <div className="bg-white border rounded-xl p-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Choose Child</label>

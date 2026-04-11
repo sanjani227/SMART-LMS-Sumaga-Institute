@@ -174,35 +174,61 @@ export const classesForTeacher = async (req, res) => {
 export const uploadStudyMaterials = async (req, res) => {
   try {
     const files = req.files;
-    const { grade } = req.body;
+    // Extract everything frontend might send
+    const { grade, classId, title, description } = req.body;
     const teacherId = req.user.id;
 
-    console.log("---", teacherId);
-
-    const teacher = await teacherRepo.find({
+    const teacher = await teacherRepo.findOne({
       where: { userId: teacherId },
     });
 
-    console.log(teacher);
-
-    if (!teacher || teacher.length == 0) {
+    if (!teacher) {
       return res.status(404).json({
         code: 404,
         message: "Teacher not found",
       });
     }
 
-    const subject = await subjectRepo.find({
-      where: {
-        subjectName: teacher[0].specialization,
-      },
-    });
+    let subjectIdContext = null;
+    let actualGrade = grade || 1; // Default fallback
 
-    console.log(subject);
+    // Attempt to get subject from classId if provided by our new frontend
+    if (classId) {
+       const classRepo = myDataSource.getRepository("Class");
+       const classInfo = await classRepo.findOne({
+           where: { classId: parseInt(classId) },
+           relations: ["subject"]
+       });
+       if (classInfo && classInfo.subject) {
+           subjectIdContext = classInfo.subject.subjectId;
+           // If grade wasn't explicitly provided, extract from subject if possible
+           // (Assuming subject.gradeLevel exists, fall back if not)
+           actualGrade = classInfo.subject.gradeLevel || grade || 1;
+       }
+    }
+
+    // Fallback to teacher's specialization if subjectId Context is still null
+    if (!subjectIdContext && teacher.specialization) {
+      const subject = await subjectRepo.findOne({
+        where: {
+          subjectName: teacher.specialization,
+        },
+      });
+      if (subject) {
+        subjectIdContext = subject.subjectId;
+      }
+    }
+
+    if (!subjectIdContext) {
+       return res.status(400).json({
+          code: 400,
+          message: "Could not determine subject. Please update your profile specialization or select a valid class."
+       });
+    }
 
     if (!files || files.length == 0) {
-      return res.json({
-        code: 404,
+      return res.status(400).json({
+        code: 400,
         message: "No files found",
       });
     }
@@ -211,10 +237,10 @@ export const uploadStudyMaterials = async (req, res) => {
 
     for (let file of files) {
       let studyMaterial = await studyMaterialRepo.create({
-        fileName: file.filename,
-        grade: grade,
-        teacherId: teacher[0].teacherId,
-        subjectId: subject[0].subjectId,
+        fileName: title ? `${title} - ${file.filename}` : file.filename, // Keep title in filename for display
+        grade: parseInt(actualGrade),
+        teacherId: teacher.teacherId,
+        subjectId: subjectIdContext,
       });
 
       studyMaterial = await studyMaterialRepo.save(studyMaterial);
