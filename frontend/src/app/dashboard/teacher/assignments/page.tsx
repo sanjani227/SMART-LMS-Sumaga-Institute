@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Calendar, Clock, Edit, Eye, GraduationCap, Plus, Users, X } from "lucide-react";
+import Link from "next/link";
 
 interface Assignment {
   assignmentId: number;
@@ -34,10 +38,11 @@ interface Class {
 }
 
 export default function TeacherAssignmentsPage() {
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form State
   const [classId, setClassId] = useState("");
@@ -55,6 +60,7 @@ export default function TeacherAssignmentsPage() {
   const fetchAssignments = async () => {
     try {
       setLoading(true);
+      setError(null);
       const token = localStorage.getItem("authToken");
       
       const response = await axios.get(
@@ -79,8 +85,6 @@ export default function TeacherAssignmentsPage() {
 
   const fetchClasses = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
         {
@@ -89,11 +93,18 @@ export default function TeacherAssignmentsPage() {
       );
 
       if (response.data.code === 200) {
-        setTeacherClasses(response.data.data.classes || []);
+        setClasses(response.data.data.classes || []);
       }
     } catch (error: any) {
       console.error("Error fetching classes:", error);
     }
+  };
+
+  const getDaysUntilDue = (dueDateStr: string) => {
+    const due = new Date(dueDateStr);
+    const now = new Date();
+    const diffTime = due.getTime() - now.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   const handleCreateAssignment = async (e: React.FormEvent) => {
@@ -103,7 +114,15 @@ export default function TeacherAssignmentsPage() {
       return;
     }
 
-      const token = localStorage.getItem("authToken");
+    setSubmitting(true);
+    try {
+      const newAssignment = {
+        classId: parseInt(classId),
+        title,
+        description,
+        dueDate,
+        maxScore: parseInt(maxScore) || 100
+      };
       
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments`,
@@ -113,7 +132,7 @@ export default function TeacherAssignmentsPage() {
         }
       );
 
-      if (res.data.code === 200) {
+      if (response.data.code === 200) {
         toast.success("Assignment created successfully");
         setIsModalOpen(false);
         // Reset form
@@ -121,9 +140,10 @@ export default function TeacherAssignmentsPage() {
         setDescription("");
         setDueDate("");
         setMaxScore("100");
+        setClassId("");
         fetchAssignments(); // Refresh list
       } else {
-        toast.error(res.data.message || "Failed to create assignment");
+        toast.error(response.data.message || "Failed to create assignment");
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Error creating assignment");
@@ -154,99 +174,99 @@ export default function TeacherAssignmentsPage() {
         <div className="flex justify-center py-10">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         </div>
-        
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <Clock className="w-8 h-8 text-yellow-600" />
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-yellow-800">
-                {assignments.filter(a => getDaysUntilDue(a.dueDate) <= 7).length}
-              </h3>
-              <p className="text-sm text-yellow-600">Due This Week</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-green-600" />
-            <div className="ml-3">
-              <h3 className="text-lg font-semibold text-green-800">
-                {assignments.reduce((sum, a) => sum + a.submissionCount, 0)}
-              </h3>
-              <p className="text-sm text-green-600">Total Submissions</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Assignments List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {assignments.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Assignments Yet</h3>
-            <p className="text-gray-500">Create your first assignment to get started.</p>
-          </div>
-        ) : (
-          assignments.map((assignment) => {
-            const daysUntilDue = getDaysUntilDue(assignment.dueDate);
-            const isOverdue = daysUntilDue < 0;
-            const isDueSoon = daysUntilDue <= 3 && daysUntilDue >= 0;
-
-            return (
-              <div
-                key={assignment.assignmentId}
-                className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                      {assignment.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2">
-                        {assignment.class?.subject?.subjectName || "Subject not assigned"}
-                        {assignment.class?.subject?.gradeLevel
-                          ? ` - Grade ${assignment.class.subject.gradeLevel}`
-                          : ""}
-                    </p>
-                    {assignment.description && (
-                      <p className="text-sm text-gray-500 line-clamp-2">
-                        {assignment.description}
-                      </p>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar size={16} className="text-gray-400" />
-                  <span className={new Date(assignment.dueDate) < new Date() ? "text-red-500 font-medium" : ""}>
-                    Due: {new Date(assignment.dueDate).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-orange-600 font-medium pt-2 w-full">
-                  <div className="flex items-center gap-2">
-                    <Users size={16} />
-                    <span>{assignment.submissionCount} Submissions</span>
-                  </div>
-                  <Link 
-                    href={`/dashboard/teacher/assignments/${assignment.assignmentId}/submissions`}
-                    className="text-xs bg-orange-50 hover:bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg transition"
-                  >
-                    View & Grade
-                  </Link>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <Clock className="w-8 h-8 text-yellow-600" />
+                <div className="ml-3">
+                  <h3 className="text-lg font-semibold text-yellow-800">
+                    {assignments.filter(a => getDaysUntilDue(a.dueDate) <= 7).length}
+                  </h3>
+                  <p className="text-sm text-yellow-600">Due This Week</p>
                 </div>
               </div>
             </div>
-          ))}
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <Users className="w-8 h-8 text-green-600" />
+                <div className="ml-3">
+                  <h3 className="text-lg font-semibold text-green-800">
+                    {assignments.reduce((sum, a) => sum + (a.submissionCount || 0), 0)}
+                  </h3>
+                  <p className="text-sm text-green-600">Total Submissions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {assignments.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Assignments Yet</h3>
+                <p className="text-gray-500">Create your first assignment to get started.</p>
+              </div>
+            ) : (
+              assignments.map((assignment) => {
+                const daysUntilDue = getDaysUntilDue(assignment.dueDate);
+                return (
+                  <div
+                    key={assignment.assignmentId}
+                    className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                          {assignment.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-2">
+                            {assignment.class?.subject?.subjectName || "Subject not assigned"}
+                            {assignment.class?.subject?.gradeLevel
+                              ? ` - Grade ${assignment.class.subject.gradeLevel}`
+                              : ""}
+                        </p>
+                        {assignment.description && (
+                          <p className="text-sm text-gray-500 line-clamp-2">
+                            {assignment.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 ml-4">
+                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-md">
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-gray-400" />
+                      <span className={new Date(assignment.dueDate) < new Date() ? "text-red-500 font-medium" : ""}>
+                        Due: {new Date(assignment.dueDate).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-orange-600 font-medium pt-2 w-full">
+                      <div className="flex items-center gap-2">
+                        <Users size={16} />
+                        <span>{assignment.submissionCount || 0} Submissions</span>
+                      </div>
+                      <Link 
+                        href={`/dashboard/teacher/assignments/${assignment.assignmentId}/submissions`}
+                        className="text-xs bg-orange-50 hover:bg-orange-100 text-orange-600 px-3 py-1.5 rounded-lg transition"
+                      >
+                        View & Grade
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 

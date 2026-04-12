@@ -2,6 +2,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { User, Wallet, CheckCircle2, Loader2 } from "lucide-react";
 
 interface Child {
     studentId: number;
@@ -55,7 +58,7 @@ export default function ChildPayments() {
             setChildren(linkedChildren);
 
             if (!linkedChildren.length) {
-                setError("No linked children found. Please link a child first in Parent Settings.");
+                // Not throwing error to allow rendering children length check
                 setLoading(false);
                 return;
             }
@@ -115,10 +118,6 @@ export default function ChildPayments() {
         return { totalDue, totalPaid };
     }, [invoices]);
 
-    if (loading) {
-        return <div className="p-6 text-center text-gray-500">Loading payments...</div>;
-    }
-
     if (error) {
         return (
             <div className="p-6">
@@ -127,135 +126,112 @@ export default function ChildPayments() {
         );
     }
 
+    if (!loading && children.length === 0) {
+        return (
+          <div className="p-6">
+            <div className="bg-white p-10 rounded-2xl border text-center">
+              <User className="mx-auto text-gray-300 mb-4" size={48} />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">No Children Found</h3>
+              <p className="text-gray-500">
+                We could not find any students linked to your account. Please contact the administration or ensure your profile is fully synced.
+              </p>
+            </div>
+          </div>
+        );
+    }
+
     return (
-      <div className="p-6">
-        <div className="bg-white p-10 rounded-2xl border text-center">
-          <User className="mx-auto text-gray-300 mb-4" size={48} />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">No Children Found</h3>
-          <p className="text-gray-500">
-            We could not find any students linked to your account. Please contact the administration or ensure your profile is fully synced.
-          </p>
+      <div className="p-6 space-y-6">
+        <ToastContainer position="top-right" autoClose={3000} />
+  
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Payments & Fees</h1>
+            <p className="text-sm text-gray-500">Review your child's payment history and pending dues</p>
+          </div>
+  
+          <div className="w-full md:w-auto min-w-[250px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Select Child
+            </label>
+            <select
+              value={selectedStudentId}
+              onChange={(e) => handleChildChange(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none bg-white"
+            >
+              {children.map((child) => (
+                <option key={child.studentId} value={child.studentId}>
+                  {child.fullName} - Grade {child.grade || "N/A"}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  // Calculate stats
-  const totalPaid = paymentData
-    .filter(p => p.status.toLowerCase() === 'completed')
-    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
-    
-  const totalPending = paymentData
-    .filter(p => p.status.toLowerCase() === 'pending')
-    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
-
-  return (
-    <div className="p-6 space-y-6">
-      <ToastContainer position="top-right" autoClose={3000} />
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">Payments & Fees</h1>
-          <p className="text-sm text-gray-500">Review your child's payment history and pending dues</p>
-        </div>
-
-        <div className="w-full md:w-auto min-w-[250px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Child
-          </label>
-          <select
-            value={selectedChild}
-            onChange={(e) => setSelectedChild(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none bg-white"
-          >
-            {children.map((child) => (
-              <option key={child.studentId} value={child.studentId}>
-                {child.fullName} - Grade {child.grade}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {fetchingPayments ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-        </div>
-      ) : paymentData.length === 0 ? (
-        <div className="bg-white p-10 rounded-2xl border text-center">
-          <Wallet className="mx-auto text-gray-300 mb-4" size={48} />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">No Invoices Yet</h3>
-          <p className="text-gray-500">
-            There are no payment records or pending invoices for this student.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500 font-medium mb-1">Total Paid</p>
-                <p className="text-3xl font-bold text-gray-800">
-                  Rs. {totalPaid.toLocaleString()}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                <CheckCircle2 size={24} />
-              </div>
-            </div>
-
-            <div className="bg-white border rounded-xl p-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Choose Child</label>
-                <select
-                    value={selectedStudentId}
-                    onChange={(e) => handleChildChange(e.target.value)}
-                    className="w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md"
-                >
-                    {children.map((child) => (
-                        <option key={child.studentId} value={child.studentId}>
-                            {child.fullName} (Grade {child.grade || "N/A"})
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="bg-white border rounded-xl p-4 shadow-sm">
-                    <p className="text-sm text-gray-500">Total due</p>
-                    <p className="text-2xl font-bold">${stats.totalDue.toFixed(2)}</p>
+  
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          </div>
+        ) : invoices.length === 0 ? (
+          <div className="bg-white p-10 rounded-2xl border text-center">
+            <Wallet className="mx-auto text-gray-300 mb-4" size={48} />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No Invoices Yet</h3>
+            <p className="text-gray-500">
+              There are no payment records or pending invoices for this student.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium mb-1">Total Paid</p>
+                  <p className="text-3xl font-bold text-gray-800">
+                    Rs. {stats.totalPaid.toLocaleString()}
+                  </p>
                 </div>
-                <div className="bg-white border rounded-xl p-4 shadow-sm">
-                    <p className="text-sm text-gray-500">Total paid</p>
-                    <p className="text-2xl font-bold">${stats.totalPaid.toFixed(2)}</p>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                  <CheckCircle2 size={24} />
                 </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium mb-1">Total Due</p>
+                  <p className="text-3xl font-bold text-gray-800">
+                    Rs. {stats.totalDue.toLocaleString()}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+                  <Wallet size={24} />
+                </div>
+              </div>
             </div>
 
             <div className="bg-white border rounded-xl shadow-sm divide-y">
-                {invoices.length === 0 ? (
-                    <div className="p-8 text-center text-sm text-gray-500">No payment records found.</div>
-                ) : (
-                    invoices.map((inv) => (
-                        <div key={inv.paymentId} className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="font-semibold text-gray-800">{inv.paymentType.replace("_", " ")}</p>
-                                <p className="text-xs text-gray-500">Amount: ${Number(inv.amount).toFixed(2)}</p>
-                            </div>
-                            <span
-                                className={`text-sm font-medium ${
-                                    inv.status === "completed"
-                                        ? "text-green-600"
-                                        : inv.status === "pending"
-                                            ? "text-orange-600"
-                                            : "text-red-600"
-                                }`}
-                            >
-                                {inv.status}
-                            </span>
+                {invoices.map((inv) => (
+                    <div key={inv.paymentId} className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="font-semibold text-gray-800 capitalize">{inv.paymentType.replace("_", " ")}</p>
+                            <p className="text-xs text-gray-500">Amount: Rs. {Number(inv.amount).toFixed(2)}</p>
                         </div>
-                    ))
-                )}
+                        <span
+                            className={`text-sm font-medium px-3 py-1 rounded-full ${
+                                inv.status === "completed"
+                                    ? "bg-green-100 text-green-600"
+                                    : inv.status === "pending"
+                                        ? "bg-orange-100 text-orange-600"
+                                        : "bg-red-100 text-red-600"
+                            }`}
+                        >
+                            {inv.status}
+                        </span>
+                    </div>
+                ))}
             </div>
-        </div>
+          </div>
+        )}
+      </div>
     );
 }

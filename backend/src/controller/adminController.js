@@ -74,3 +74,61 @@ export const getIncomeStats = async (req, res) => {
      return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await adminRepo.findOne({ where: { id: parseInt(id) } });
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "User not found" });
+    }
+
+    return res.status(200).json({ code: 200, data: user });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, userType, isDeleted } = req.body;
+
+    const user = await adminRepo.findOne({ where: { id: parseInt(id) } });
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "User not found" });
+    }
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (userType) user.userType = userType;
+    if (isDeleted !== undefined) user.isDeleted = isDeleted;
+
+    await adminRepo.save(user);
+
+    return res.status(200).json({ code: 200, message: "User updated successfully", data: user });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: "Internal server error", error: error.message });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await adminRepo.findOne({ where: { id: parseInt(id) } });
+
+    if (!user) {
+      return res.status(404).json({ code: 404, message: "User not found" });
+    }
+
+    user.isDeleted = true;
+    await adminRepo.save(user);
+
+    return res.status(200).json({ code: 200, message: "User deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ code: 500, message: "Internal server error", error: error.message });
+  }
+};

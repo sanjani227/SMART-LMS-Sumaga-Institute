@@ -159,4 +159,48 @@ export const checkClassOverlapForTeacher = async (
   }
 };
 
-export const updateClass = () => {};
+export const updateClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { teacherId, scheduleDay, scheduleTime, isDeleted } = req.body;
+
+    const classInstance = await classRepo.findOne({ where: { classId: parseInt(id) } });
+
+    if (!classInstance) {
+      return res.status(404).json({ code: 404, message: "Class not found" });
+    }
+
+    if (teacherId !== undefined) classInstance.teacherId = teacherId;
+    if (scheduleDay !== undefined) classInstance.scheduleDay = scheduleDay;
+    if (scheduleTime !== undefined) classInstance.scheduleTime = scheduleTime;
+    if (isDeleted !== undefined) classInstance.isDeleted = isDeleted;
+
+    await classRepo.save(classInstance);
+
+    return res.status(200).json({ code: 200, message: "Class updated successfully", data: classInstance });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};
+
+export const deleteClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Soft delete
+    const classInstance = await classRepo.findOne({ where: { classId: parseInt(id) } });
+
+    if (!classInstance) {
+      return res.status(404).json({ code: 404, message: "Class not found" });
+    }
+
+    classInstance.isDeleted = true;
+    await classRepo.save(classInstance);
+
+    return res.status(200).json({ code: 200, message: "Class deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};

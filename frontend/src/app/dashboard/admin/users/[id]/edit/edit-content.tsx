@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
-import { UserType } from '@/src/utils/enum';
+import axios from 'axios';
 
 export function EditUserContent() {
   const router = useRouter();
@@ -11,28 +11,78 @@ export function EditUserContent() {
   const userId = params.id;
 
   const [formData, setFormData] = useState({
-    name: 'Sanjani',
-    email: 'sanjanimapa@gmail.com',
-    UserType: 'Teacher',
-    status: 'Active'
+    firstName: '',
+    lastName: '',
+    email: '',
+    userType: 'student',
+    isDeleted: false
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    if (userId) {
+      fetchUser();
+    }
+  }, [userId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const fetchUser = async () => {
     try {
-      console.log('Updating user:', userId, formData);
-      router.push('/dashboard/admin/users');
+      setIsLoading(true);
+      const res = await axios.get(`http://localhost:3000/api/v1/auth/users/${userId}`);
+      if (res.data.code === 200) {
+        const u = res.data.data;
+        setFormData({
+          firstName: u.firstName || '',
+          lastName: u.lastName || '',
+          email: u.email || '',
+          userType: u.userType || 'student',
+          isDeleted: u.isDeleted || false
+        });
+      } else {
+        setError('Failed to load user.');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error occurred while loading form.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'status') {
+      setFormData(prev => ({ ...prev, isDeleted: value === 'inactive' }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setError('');
+    try {
+      const res = await axios.put(`http://localhost:3000/api/v1/auth/users/${userId}`, formData);
+      if (res.data.code === 200) {
+        router.push('/dashboard/admin/users');
+      } else {
+        setError(res.data.message || 'Update failed');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error occurred while saving.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="p-10 text-gray-500">Loading user details...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -53,17 +103,38 @@ export function EditUserContent() {
       {/* Form */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-bold text-gray-800 mb-2">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
-            />
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* First Name */}
+            <div>
+              <label className="block text-sm font-bold text-gray-800 mb-2">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
+              />
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label className="block text-sm font-bold text-gray-800 mb-2">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
+              />
+            </div>
           </div>
 
           {/* Email */}
@@ -83,14 +154,15 @@ export function EditUserContent() {
           <div>
             <label className="block text-sm font-bold text-gray-800 mb-2">Role</label>
             <select
-              name="role"
-              value={formData.UserType}
+              name="userType"
+              value={formData.userType}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
             >
-              <option>Teacher</option>
-              <option>Student</option>
-              <option>Parent</option>
+              <option value="teacher">Teacher</option>
+              <option value="student">Student</option>
+              <option value="parent">Parent</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
 
@@ -99,12 +171,12 @@ export function EditUserContent() {
             <label className="block text-sm font-bold text-gray-800 mb-2">Status</label>
             <select
               name="status"
-              value={formData.status}
+              value={formData.isDeleted ? 'inactive' : 'active'}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
             >
-              <option value= "active">Active</option>
-              <option value= "inactive">Inactive</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
             </select>
           </div>
 
@@ -113,17 +185,17 @@ export function EditUserContent() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-800 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="flex-1 px-6 py-3 border border-gray-300 text-gray-800 rounded-lg font-semibold hover:bg-gray-50 transition border-solid"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSaving}
               className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition"
             >
               <Save size={20} />
-              {isLoading ? 'Saving...' : 'Update User'}
+              {isSaving ? 'Saving...' : 'Update User'}
             </button>
           </div>
         </form>

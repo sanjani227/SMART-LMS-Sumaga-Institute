@@ -1,6 +1,6 @@
 "use client";
 
-import axios, { all } from "axios";
+import axios from "axios";
 import {
   Search,
   Plus,
@@ -26,10 +26,20 @@ export default function ManageClassesPage() {
   const [newClassDetails, setNewClassDetails] = useState({
     teacherId: "",
     scheduleDay: "Monday",
-    scheduleTime: "08:00 AM",
+    scheduleTime: "08:00",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Edit Class Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editClassDetails, setEditClassDetails] = useState({
+    classId: "",
+    teacherId: "",
+    scheduleDay: "Monday",
+    scheduleTime: "08:00",
+    isDeleted: false
+  });
 
   const getAllClasses = async () => {
     try {
@@ -43,11 +53,7 @@ export default function ManageClassesPage() {
       setClasses(response.data.data.map((e:any) => e));
 
        setActiveClasses(response.data.data.filter((e:any) => e.isDeleted == false).length)
-      //  console.log("_______________", activeClasses)
        console.log("_______________", allClasses)
-
-      
-
     } catch (error) {
       console.log(error);
     }
@@ -58,7 +64,6 @@ export default function ManageClassesPage() {
       const response = await axios.get(
         "http://localhost:3000/api/v1/auth/allUsers",
       );
-      console.log(" asbfjhabfjh", response.data.data);
       setAllUsers(response.data.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -102,7 +107,7 @@ export default function ManageClassesPage() {
       
       if (res.data.code === 200) {
         setShowAddModal(false);
-        setNewClassDetails({ teacherId: "", scheduleDay: "Monday", scheduleTime: "08:00 AM" });
+        setNewClassDetails({ teacherId: "", scheduleDay: "Monday", scheduleTime: "08:00" });
         getAllClasses(); // refresh list
       } else {
         setSubmitError(res.data.message || "Failed to create class.");
@@ -111,6 +116,63 @@ export default function ManageClassesPage() {
       setSubmitError(error.response?.data?.message || "An error occurred.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEditClassClick = (cls: any) => {
+    setEditClassDetails({
+      classId: cls.classId,
+      teacherId: cls.teacherId,
+      scheduleDay: cls.scheduleDay,
+      scheduleTime: cls.scheduleTime,
+      isDeleted: cls.isDeleted
+    });
+    setSubmitError("");
+    setShowEditModal(true);
+  };
+
+  const handleUpdateClass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const payload = {
+        teacherId: editClassDetails.teacherId,
+        scheduleDay: editClassDetails.scheduleDay,
+        scheduleTime: editClassDetails.scheduleTime,
+        isDeleted: editClassDetails.isDeleted
+      };
+
+      const res = await axios.put(
+        `http://localhost:3000/api/v1/classes/updateClass/${editClassDetails.classId}`,
+        payload,
+        { withCredentials: true }
+      );
+
+      if (res.data.code === 200) {
+        setShowEditModal(false);
+        getAllClasses();
+      } else {
+        setSubmitError(res.data.message || "Failed to edit class.");
+      }
+    } catch (error: any) {
+      setSubmitError(error.response?.data?.message || "An error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteClass = async (classId: number) => {
+    if (confirm("Are you sure you want to deactivate/delete this class?")) {
+      try {
+        await axios.delete(`http://localhost:3000/api/v1/classes/deleteClass/${classId}`, {
+          withCredentials: true
+        });
+        getAllClasses();
+      } catch (error) {
+        console.error("Error deleting class:", error);
+      }
     }
   };
 
@@ -242,10 +304,16 @@ export default function ManageClassesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2 justify-end">
-                      <button className="p-2 hover:bg-orange-50 text-orange-600 rounded-lg transition">
+                      <button 
+                        onClick={() => handleEditClassClick(cls)}
+                        className="p-2 hover:bg-orange-50 text-orange-600 rounded-lg transition"
+                      >
                         <Pencil size={16} />
                       </button>
-                      <button className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition">
+                      <button 
+                        onClick={() => handleDeleteClass(cls.classId)}
+                        className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -348,6 +416,92 @@ export default function ManageClassesPage() {
                 className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition mt-4 flex justify-center items-center gap-2"
               >
                 {isSubmitting ? <><BookOpen size={18} className="animate-spin" /> Creating...</> : "Create Class"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Class Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-xl">
+            <button 
+              onClick={() => setShowEditModal(false)} 
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 p-2 rounded-full transition"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-bold text-gray-800 mb-6">Edit Class</h3>
+            
+            <form onSubmit={handleUpdateClass} className="space-y-4">
+              {submitError && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium">
+                  {submitError}
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Assign Teacher</label>
+                <select 
+                  value={editClassDetails.teacherId}
+                  onChange={(e) => setEditClassDetails({...editClassDetails, teacherId: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  <option value="" disabled>Select a teacher...</option>
+                  {teachers?.map((t: any) => (
+                    <option key={t.teacherId} value={t.teacherId}>
+                      {t.fullName} ({t.specialization || "No Specific Subject"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Schedule Day</label>
+                <select 
+                  value={editClassDetails.scheduleDay}
+                  onChange={(e) => setEditClassDetails({...editClassDetails, scheduleDay: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Schedule Time</label>
+                <input 
+                  type="time" 
+                  value={editClassDetails.scheduleTime}
+                  onChange={(e) => setEditClassDetails({...editClassDetails, scheduleTime: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2 flex items-center gap-2 pt-2">
+                <input 
+                  type="checkbox"
+                  id="classStatus"
+                  checked={!editClassDetails.isDeleted}
+                  onChange={(e) => setEditClassDetails({...editClassDetails, isDeleted: !e.target.checked})}
+                  className="w-5 h-5 accent-orange-600 rounded"
+                />
+                <label htmlFor="classStatus" className="text-sm font-bold text-gray-700 cursor-pointer">
+                  Class is active and visible
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition mt-4 flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? <><BookOpen size={18} className="animate-spin" /> Saving...</> : "Save Changes"}
               </button>
             </form>
           </div>

@@ -85,10 +85,14 @@ export default function ManageUsersPage() {
     router.push(`/dashboard/admin/users/${userId}/edit`);
   };
 
-  const handleDeleteUser = (userId: number) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      console.log("Deleting user:", userId);
-      // Add delete API call here
+  const handleDeleteUser = async (userId: number) => {
+    if (confirm("Are you sure you want to disable this user?")) {
+      try {
+        await axios.delete(`http://localhost:3000/api/v1/auth/users/${userId}`);
+        getAllUsers(); // refresh data
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
   };
 
@@ -183,9 +187,9 @@ export default function ManageUsersPage() {
                   <td className="px-8 py-5">
                     <div className="flex justify-center">
                       <span
-                        className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusStyle(user.isDelete)}`}
+                        className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase ${getStatusStyle(!user.isDeleted)}`}
                       >
-                        {!user.isDelete ? "Active" : "DeActivated"}
+                        {!user.isDeleted ? "Active" : "DeActivated"}
                       </span>
                     </div>
                   </td>
