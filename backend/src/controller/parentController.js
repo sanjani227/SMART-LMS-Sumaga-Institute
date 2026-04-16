@@ -450,3 +450,80 @@ export const linkStudent = async (req, res) => {
     });
   }
 };
+
+// Update Parent Profile Details
+export const updateParentProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { fullName, contact } = req.body;
+
+    const parent = await parentRepo.findOne({
+      where: { userId },
+    });
+
+    if (!parent) {
+      return res.status(404).json({ code: 404, message: "Parent profile not found" });
+    }
+
+    if (fullName) parent.fullName = fullName;
+    if (contact) parent.contact = contact;
+
+    await parentRepo.save(parent);
+
+    return res.status(200).json({
+      code: 200,
+      message: "Profile updated successfully",
+      data: parent
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};
+
+// Process an open payment invoice (simulate online / store bank_transfer slip)
+export const processPayment = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { paymentId } = req.params;
+    const { paymentMethod, slipUrl } = req.body;
+
+    const parent = await parentRepo.findOne({
+      where: { userId },
+      relations: ["students"],
+    });
+
+    if (!parent) return res.status(404).json({ code: 404, message: "Parent not found" });
+
+    const payment = await paymentRepo.findOne({
+      where: { paymentId: parseInt(paymentId) },
+    });
+
+    if (!payment) return res.status(404).json({ code: 404, message: "Payment not found" });
+
+    // Validate ownership via relations mapping logic locally
+    const studentExists = parent.students.some((s) => s.studentId === payment.studentId);
+    if (!studentExists) {
+        return res.status(403).json({ code: 403, message: "Payment invoice does not belong to your listed child." });
+    }
+
+    if (paymentMethod === "card") {
+        payment.paymentMethod = "card";
+        payment.status = "completed";
+        payment.paidDate = new Date();
+    } else if (paymentMethod === "bank_transfer") {
+        payment.paymentMethod = "bank_transfer";
+        payment.slipUrl = slipUrl || null;
+        payment.status = "pending"; 
+    } else {
+        return res.status(400).json({ code: 400, message: "Unsupported payment method format." });
+    }
+
+    await paymentRepo.save(payment);
+
+    return res.status(200).json({ code: 200, message: "Payment submitted dynamically successfully." });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};

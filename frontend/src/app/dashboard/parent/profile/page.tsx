@@ -23,6 +23,11 @@ export default function ParentProfilePage() {
   const [studentEmail, setStudentEmail] = useState("");
   const [linking, setLinking] = useState(false);
 
+  // Edit Profile State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ fullName: "", contact: "" });
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     fetchParentProfile();
     fetchChildren();
@@ -61,6 +66,10 @@ export default function ParentProfilePage() {
 
       if (response.data.code === 200) {
         setParent(response.data.data);
+        setEditForm({ 
+            fullName: response.data.data.fullName || "", 
+            contact: response.data.data.contact || "" 
+        });
       } else {
         setError(response.data.message || "Failed to fetch profile. You might need to sync your account.");
       }
@@ -126,6 +135,37 @@ export default function ParentProfilePage() {
     }
   };
 
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editForm.fullName.trim() || !editForm.contact.trim()) {
+        toast.error("Name and contact cannot be empty");
+        return;
+    }
+    
+    try {
+        setIsSaving(true);
+        const token = localStorage.getItem("TOKEN");
+        
+        const response = await axios.put(
+            `http://localhost:3000/api/v1/parents/profile/update`,
+            editForm,
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data.code === 200) {
+            toast.success("Profile updated seamlessly!");
+            setIsEditing(false);
+            fetchParentProfile();
+        } else {
+            toast.error(response.data.message || "Failed to update profile");
+        }
+    } catch (error: any) {
+        toast.error(error.response?.data?.message || "Error updating profile");
+    } finally {
+        setIsSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 flex justify-center items-center min-h-64">
@@ -169,43 +209,97 @@ export default function ParentProfilePage() {
 
       {/* Profile Information */}
       {parent && (
-        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-6 border-b pb-3">Personal Information</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                Full Name
-              </label>
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
-                  <User className="w-4 h-4" />
-                </div>
-                <span className="text-gray-800 font-medium text-lg">{parent.fullName}</span>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                Email Address
-              </label>
-              <div className="flex items-center">
-                <span className="text-gray-800 font-medium">{parent.email}</span>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-                Contact Number
-              </label>
-              <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <span className="text-gray-800 font-medium">{parent.contact || 'Not set'}</span>
-              </div>
-            </div>
+        <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 relative">
+          <div className="flex justify-between items-center mb-6 border-b pb-3">
+             <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
+             {!isEditing ? (
+                 <button 
+                    onClick={() => setIsEditing(true)}
+                    className="text-orange-600 hover:text-orange-700 bg-orange-50 px-4 py-2 rounded-lg text-sm font-semibold transition"
+                 >
+                     Edit Profile
+                 </button>
+             ) : null}
           </div>
+          
+          {!isEditing ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  Full Name
+                </label>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
+                    <User className="w-4 h-4" />
+                  </div>
+                  <span className="text-gray-800 font-medium text-lg">{parent.fullName}</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 opacity-60">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  Email Address
+                </label>
+                <div className="flex items-center">
+                  <span className="text-gray-800 font-medium">{parent.email}</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  Contact Number
+                </label>
+                <div className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-3">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <span className="text-gray-800 font-medium">{parent.contact || 'Not set'}</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                        <input 
+                            type="text" 
+                            required
+                            value={editForm.fullName}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, fullName: e.target.value }))}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
+                        <input 
+                            type="text" 
+                            required
+                            value={editForm.contact}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, contact: e.target.value }))}
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                        />
+                    </div>
+                </div>
+                <div className="flex gap-4 pt-4">
+                    <button 
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit"
+                        disabled={isSaving}
+                        className="px-6 py-2 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 transition flex items-center gap-2"
+                    >
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        {isSaving ? "Saving..." : "Save Changes"}
+                    </button>
+                </div>
+            </form>
+          )}
         </div>
       )}
 
@@ -298,8 +392,7 @@ export default function ParentProfilePage() {
         </h4>
         <ul className="text-sm text-blue-700 space-y-2 list-disc list-inside">
           <li>If your details are missing, clicking the "Sync Profile" button will import your data from your registration account.</li>
-          <li>Your email address is currently used as your default contact method.</li>
-          <li>If you need to update your contact number or name, please contact the school administration.</li>
+          <li>Your email address is currently used as your default login context.</li>
         </ul>
       </div>
     </div>

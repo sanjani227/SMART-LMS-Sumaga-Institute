@@ -29,6 +29,7 @@ export const Payment = new EntitySchema({
         paidDate: { type: "date", nullable: true },
         description: { type: "text", nullable: true },
         receiptNumber: { type: "varchar", nullable: true, unique: true },
+        slipUrl: { type: "longtext", nullable: true },
         createdAt: { type: "timestamp", createDate: true },
         updatedAt: { type: "timestamp", updateDate: true },
     },

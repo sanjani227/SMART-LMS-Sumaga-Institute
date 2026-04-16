@@ -8,7 +8,9 @@ import {
   getChildPayments, 
   getChildProgress,
   syncParentUser,
-  linkStudent
+  linkStudent,
+  updateParentProfile,
+  processPayment
 } from '../controller/parentController.js';
 import { authenticate, requireParent } from '../middleware/authentication.js';
 
@@ -40,5 +42,11 @@ parentRoute.get("/children/:studentId/progress", authenticate, requireParent, ge
 
 // Link a student to the parent (protected)
 parentRoute.post("/link-student", authenticate, requireParent, linkStudent);
+
+// Update explicit personal profile (protected)
+parentRoute.put("/profile/update", authenticate, requireParent, updateParentProfile);
+
+// Post Payment Processing UI simulation and form uploads (protected)
+parentRoute.post("/payments/:paymentId/pay", authenticate, requireParent, processPayment);
 
 export default parentRoute;

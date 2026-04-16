@@ -12,60 +12,60 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [nofClasses, setNoOfClasses] = useState(0)
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [adminStats, setAdminStats] = useState({
+    students: 0,
+    teachers: 0,
+    classes: 0,
+    announcements: 0
+  });
 
   const { name, userType } =
     useContext(UserContext) || ({ name: "GUEST", userType: "guest" } as const);
   const role = (userType || "guest").toLowerCase();
 
-  const getClasses = async () => {
+  const fetchDashboardData = async () => {
+    try {
+      // Teacher class count fetch
+      if (role === 'teacher') {
+        const token = localStorage.getItem("TOKEN") || localStorage.getItem("token")
+        const classes = await axios.get(
+          "http://localhost:3000/api/v1/teachers/classes",
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setNoOfClasses(classes.data?.data?.classes?.length || 0);
+      }
 
-    // const token = localStorage.getItem("token")
-    const token = localStorage.getItem("TOKEN")
-     
-    const classes = await axios.get(
-      "http://localhost:3000/api/v1/teachers/classes",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      },
-    );
+      // Fetch global live announcements
+      const annRes = await axios.get("http://localhost:3000/api/v1/announcements/getAnnouncements");
+      if (annRes.data.code === 200) {
+        setAnnouncements(annRes.data.data);
+      }
 
-
-    const noOfClasses = classes.data.data.classes.length
-    setNoOfClasses(noOfClasses)
-
-
+      // Admin stats fetch
+      if (role === 'admin') {
+        const usersRes = await axios.get("http://localhost:3000/api/v1/auth/allUsers");
+        const classesRes = await axios.get("http://localhost:3000/api/v1/classes/getClasses", { withCredentials: true });
+        
+        const allUsers = usersRes.data.data || [];
+        
+        setAdminStats({
+          students: allUsers.filter((u:any) => u.userType === 'student').length,
+          teachers: allUsers.filter((u:any) => u.userType === 'teacher').length,
+          classes: classesRes.data?.data?.length || 0,
+          announcements: annRes.data.data.length
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    getClasses()
-  }, [])
-
-  const announcements = [
-    {
-      id: 1,
-      title: "End of Term Examinations",
-      status: "Published",
-      content:
-        "End of term examinations will begin on June 20th. Please ensure all students are prepared.",
-      by: "Admin",
-      date: "01/06/2025",
-      category: "Academic",
-      audience: ["Teachers", "Students", "Parents"],
-    },
-    {
-      id: 2,
-      title: "Class Cancel",
-      status: "Published",
-      content:
-        "Parent-Teacher meetings will be held on June 15th from 9:00 AM to 3:00 PM. Attendance is mandatory.",
-      by: "Vice Principal Smith",
-      date: "28/05/2025",
-      category: "General",
-      audience: ["Teachers", "Parents"],
-    },
-  ];
+    fetchDashboardData();
+  }, [role]);
 
   const handleLogOut = () => {
     localStorage.clear();
@@ -86,19 +86,15 @@ export default function DashboardPage() {
           <>
             <div>
               <div className="flex justify-evenly ">
-                {[1, 2, 3, 4].map((item) => (
+                {Object.entries(adminStats).map(([key, val], idx) => (
                   <div
-                    key={item}
-                    className="bg-white-400 w-[162] h-[152] border rounded-2xl border-black"
+                    key={idx}
+                    className="bg-white hover:bg-orange-50 w-40 h-36 border rounded-2xl shadow-sm border-gray-100 flex flex-col justify-between overflow-hidden transition"
                   >
-                    <div className=" flex gap-2 justify-center items-center content-center h-[100]">
-                      <User />
-                      <div>Total Students 1,234</div>
-                    </div>
-
-                    <div className="bg-gray-300 h-[52] border-b rounded-b-2xl  flex justify-center items-center border-black ">
-                      <span className="text-green-600">12%</span>{" "}
-                      <span>from last month</span>
+                    <div className="flex flex-col gap-2 justify-center items-center h-full pt-4">
+                      <User className="text-orange-600" />
+                      <div className="font-bold text-gray-800 text-lg">{val}</div>
+                      <div className="text-sm text-gray-500 capitalize">Total {key}</div>
                     </div>
                   </div>
                 ))}
@@ -139,7 +135,7 @@ export default function DashboardPage() {
                               <span>By {announcement.by}</span>
                               <span>{announcement.date}</span>
                               <span>
-                                Audience: {announcement.audience.join(", ")}
+                                Audience: {(Array.isArray(announcement.audience) ? announcement.audience : JSON.parse(announcement.audience || "[]")).join(", ")}
                               </span>
                             </div>
                           </div>
@@ -265,7 +261,7 @@ export default function DashboardPage() {
                         {announcement.category}
                       </span>
                       <span>{announcement.date}</span>
-                      <span>Audience: {announcement.audience.join(", ")}</span>
+                      <span>Audience: {(Array.isArray(announcement.audience) ? announcement.audience : JSON.parse(announcement.audience || "[]")).join(", ")}</span>
                     </div>
                   </div>
                 ))}

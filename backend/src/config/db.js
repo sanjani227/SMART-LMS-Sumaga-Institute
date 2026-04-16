@@ -25,6 +25,7 @@ import { Assessment as NewAssessment, Question, StudentAnswer, AssessmentResult 
 import dotenv from "dotenv";
 import { StudentClass } from "../model/enrollmentModel.js";
 import { StudyMaterial } from "../model/studyMaterialModel.js";
+import { Announcement } from "../model/announcementModel.js";
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ export const myDataSource = new DataSource({
     Question,
     StudentAnswer,
     AssessmentResult,
+    Announcement
   ],
   synchronize: true,
   logging: false

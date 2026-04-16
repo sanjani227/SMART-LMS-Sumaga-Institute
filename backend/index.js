@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import studentRoute from './src/routes/studentRoutes.js';
 import parentRoute from './src/routes/parentRoutes.js';
 import adminRoute from './src/routes/adminRoutes.js';
-
+import announcementRoute from './src/routes/announcementRoutes.js';
 
 
 const app = express();
@@ -66,6 +66,7 @@ app.use('/api/v1/classes', classRoute)
 app.use('/api/v1/students', studentRoute)
 app.use('/api/v1/parents', parentRoute)
 app.use('/api/v1/admin', adminRoute)
+app.use('/api/v1/announcements', announcementRoute)
 
 
 app.use("/healthCheck", (req, res) => {

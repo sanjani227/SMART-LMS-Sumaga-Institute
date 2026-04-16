@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calendar, Users, CheckSquare, X, Save, Clock } from "lucide-react";
 import axios from "axios";
 
@@ -135,7 +135,7 @@ export default function TeacherAttendance() {
       );
 
       if (response.data.code === 200) {
-        alert("Attendance saved successfully!");
+        alert("Attendance submitted and locked successfully!");
         setAttendanceChanges({});
         fetchStudentsForAttendance();
       } else {
@@ -148,6 +148,22 @@ export default function TeacherAttendance() {
       setSaving(false);
     }
   };
+
+  const attendanceStats = useMemo(() => {
+     if (!attendanceData) return { present: 0, absent: 0, late: 0, total: 0 };
+     
+     let present = 0, absent = 0, late = 0;
+     attendanceData.students.forEach(student => {
+         const currentStatus = attendanceChanges[student.studentId]?.status || 
+                               student.attendance?.status || 
+                               'absent';
+         if (currentStatus === 'present') present++;
+         else if (currentStatus === 'absent') absent++;
+         else if (currentStatus === 'late') late++;
+     });
+
+     return { present, absent, late, total: attendanceData.students.length };
+  }, [attendanceData, attendanceChanges]);
 
   return (
     <div className="p-6 space-y-6">
@@ -226,17 +242,26 @@ export default function TeacherAttendance() {
                   {selectedClass.subject.subjectName} - Grade {selectedClass.subject.gradeLevel}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  {attendanceData.date} | {attendanceData.students.length} students
+                  {attendanceData.date} | Class Roster: {attendanceData.students.length} students enrolled
                 </p>
               </div>
-              <button
-                onClick={saveAttendance}
-                disabled={saving || Object.keys(attendanceChanges).length === 0}
-                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-4 h-4" />
-                <span>{saving ? 'Saving...' : 'Save Changes'}</span>
-              </button>
+              <div className="flex gap-4 items-center">
+                 <div className="flex gap-3 text-sm font-semibold rounded-lg bg-gray-50 border px-4 py-2">
+                     <span className="text-green-600">Present: {attendanceStats.present}</span>
+                     <span className="text-gray-400">|</span>
+                     <span className="text-red-500">Absent: {attendanceStats.absent}</span>
+                     <span className="text-gray-400">|</span>
+                     <span className="text-yellow-600">Late: {attendanceStats.late}</span>
+                 </div>
+                 <button
+                   onClick={saveAttendance}
+                   disabled={saving || Object.keys(attendanceChanges).length === 0}
+                   className="flex items-center space-x-2 bg-blue-600 text-white px-5 py-2 rounded-lg font-bold shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                 >
+                   <Save className="w-4 h-4" />
+                   <span>{saving ? 'Saving...' : 'Submit Register'}</span>
+                 </button>
+              </div>
             </div>
           </div>
 
