@@ -195,30 +195,30 @@ VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', 'sumaga123', 'owner');
 
 -- Insert Sample Teacher
 INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('John', 'Doe', 'john.doe@example.com', 'teacher123', 'teacher');
+VALUES ('Nipun', 'Perera', 'Nipun.Perera@example.com', 'teacher123', 'teacher');
 
 INSERT INTO teachers (userId, fullName, specialization)
-VALUES ((SELECT id FROM users WHERE email='john.doe@example.com'), 'John Doe', 'Mathematics');
+VALUES ((SELECT id FROM users WHERE email='Nipun.Perera@example.com'), 'Nipun Perera', 'Mathematics');
 
 -- Insert Sample Parent
 INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Jane', 'Smith', 'jane.smith@example.com', 'parent123', 'parent');
+VALUES ('Kamal', 'Perera', 'Kamal.Perera@example.com', 'parent123', 'parent');
 
 INSERT INTO parents (userId, fullName, contact)
-VALUES ((SELECT id FROM users WHERE email='jane.smith@example.com'), 'Jane Smith', '0771234567');
+VALUES ((SELECT id FROM users WHERE email='Kamal.Perera@example.com'), 'Kamal Perera', '0771234567');
 
 -- Insert Sample Student
 INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Alice', 'Wonder', 'alice.wonder@example.com', 'student123', 'student');
+VALUES ('Sanjani', 'Imesha', 'Sanjani.Imesha@example.com', 'student123', 'student');
 
 INSERT INTO students (userId, fullName, dob, address, grade, parentId)
 VALUES (
-    (SELECT id FROM users WHERE email='alice.wonder@example.com'), 
-    'Alice Wonder', 
+    (SELECT id FROM users WHERE email='Sanjani.Imesha@example.com'), 
+    'Sanjani Imesha', 
     '2010-05-15', 
-    '123 Wonderland Ave', 
+    '123 Galle Road', 
     'Grade 10', 
-    (SELECT parentId FROM parents WHERE fullName='Jane Smith')
+    (SELECT parentId FROM parents WHERE fullName='Kamal Perera')
 );
 
 -- Insert Sample Subject & Class
@@ -227,7 +227,7 @@ INSERT INTO subjects (subjectName, gradeLevel) VALUES ('Mathematics', 'Grade 10'
 INSERT INTO classes (subjectId, teacherId, scheduleDay, scheduleTime) 
 VALUES (
     (SELECT subjectId FROM subjects WHERE subjectName='Mathematics'),
-    (SELECT teacherId FROM teachers WHERE fullName='John Doe'),
+    (SELECT teacherId FROM teachers WHERE fullName='Nipun Perera'),
     'Monday',
     '08:30:00'
 );
