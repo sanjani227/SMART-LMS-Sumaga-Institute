@@ -368,3 +368,13 @@ CREATE TABLE `users` (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+
+-- =======================================================================================
+-- Initial Data Seeding (Preserved Admin Credentials)
+-- =======================================================================================
+
+-- Admin account (Password is pre-hashed for 'sumaga123')
+INSERT INTO \users\ (\irstName\, \lastName\, \email\, \password\, \userType\) 
+VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', '/b.wIc2JenWOBIgKGGJbTSCqgTlMIM6pDsP6ttty', 'admin')
+ON DUPLICATE KEY UPDATE email=email;
+
