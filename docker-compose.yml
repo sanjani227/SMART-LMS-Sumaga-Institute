@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -8,12 +7,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: sanjani2001
       MYSQL_DATABASE: sumaga_lms
-      MYSQL_USER: root
+      MYSQL_USER: sumaga_user
       MYSQL_PASSWORD: sanjani2001
     ports:
       - "3308:3306"
     volumes:
-      # Mount a named volume for persistent data
       - mysql_data:/var/lib/mysql
     networks:
       - lms-network

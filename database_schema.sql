@@ -374,7 +374,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =======================================================================================
 
 -- Admin account (Password is pre-hashed for 'sumaga123')
-INSERT INTO \users\ (\irstName\, \lastName\, \email\, \password\, \userType\) 
-VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', '/b.wIc2JenWOBIgKGGJbTSCqgTlMIM6pDsP6ttty', 'admin')
-ON DUPLICATE KEY UPDATE email=email;
-
+INSERT INTO `users` (`firstName`, `lastName`, `email`, `password`, `userType`)
+VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', '$2b$10$Bdg1pHaGKLSiupo1Qr8eeurFmxrEc4SzGBB.bIaYgXrjkJMGegWam', 'admin')
+ON DUPLICATE KEY UPDATE `email` = VALUES(`email`);
