@@ -15,8 +15,10 @@ export function EditUserContent() {
     lastName: '',
     email: '',
     userType: 'student',
-    isDeleted: false
+    isDeleted: false,
+    specialization: ''
   });
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -24,8 +26,21 @@ export function EditUserContent() {
   useEffect(() => {
     if (userId) {
       fetchUser();
+      fetchSubjects();
     }
   }, [userId]);
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/v1/subjects/getSubjects`);
+      if (response.data.data) {
+        const baseSubjects = Array.from(new Set(response.data.data.map((s: any) => s.subjectName.split(' (Grade')[0])));
+        setSubjects(baseSubjects);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const fetchUser = async () => {
     try {
@@ -38,7 +53,8 @@ export function EditUserContent() {
           lastName: u.lastName || '',
           email: u.email || '',
           userType: u.userType || 'student',
-          isDeleted: u.isDeleted || false
+          isDeleted: u.isDeleted || false,
+          specialization: u.teacherProfile?.specialization || ''
         });
       } else {
         setError('Failed to load user.');
@@ -165,6 +181,24 @@ export function EditUserContent() {
               <option value="admin">Admin</option>
             </select>
           </div>
+
+          {/* Teacher Specialization */}
+          {formData.userType === 'teacher' && (
+            <div>
+              <label className="block text-sm font-bold text-gray-800 mb-2">Teaching Specialization</label>
+              <select
+                name="specialization"
+                value={formData.specialization}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-400 outline-none transition"
+              >
+                <option value="">Select a specialization...</option>
+                {subjects.map((sub, idx) => (
+                  <option key={idx} value={sub as string}>{sub as string}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Status */}
           <div>

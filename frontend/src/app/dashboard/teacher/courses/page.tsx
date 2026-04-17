@@ -15,6 +15,7 @@ export default function TeacherCoursesPage() {
   // Form State
   const [scheduleDay, setScheduleDay] = useState("Monday");
   const [scheduleTime, setScheduleTime] = useState("");
+  const [grade, setGrade] = useState("6");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function TeacherCoursesPage() {
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!teacherId || !scheduleDay || !scheduleTime) {
+    if (!teacherId || !scheduleDay || !scheduleTime || !grade) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -52,6 +53,7 @@ export default function TeacherCoursesPage() {
         "http://localhost:3000/api/v1/classes/createClass",
         {
           teacherId,
+          grade,
           scheduleDay,
           scheduleTime,
         },
@@ -155,6 +157,22 @@ export default function TeacherCoursesPage() {
             </div>
             
             <form onSubmit={handleCreateCourse} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Grade
+                </label>
+                <select
+                  value={grade}
+                  onChange={(e) => setGrade(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white text-gray-700 mb-4"
+                  required
+                >
+                  {[6, 7, 8, 9, 10, 11].map(g => (
+                    <option key={g} value={g}>Grade {g}</option>
+                  ))}
+                </select>
+              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Day of the Week

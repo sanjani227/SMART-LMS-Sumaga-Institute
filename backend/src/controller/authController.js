@@ -36,6 +36,33 @@ export const RegisterUser = async (req, res) => {
     });
     await userRepo.save(newUser);
 
+    const fullName = `${firstName} ${lastName}`;
+    const userRole = userType.toLowerCase();
+
+    if (userRole === "student") {
+        const studentRepo = myDataSource.getRepository("Student");
+        const newStudent = studentRepo.create({
+            userId: newUser.id,
+            fullName: fullName,
+        });
+        await studentRepo.save(newStudent);
+    } else if (userRole === "teacher") {
+        const teacherRepo = myDataSource.getRepository("Teacher");
+        const newTeacher = teacherRepo.create({
+            userId: newUser.id,
+            fullName: fullName,
+        });
+        await teacherRepo.save(newTeacher);
+    } else if (userRole === "parent") {
+        const parentRepo = myDataSource.getRepository("Parent");
+        const newParent = parentRepo.create({
+            userId: newUser.id,
+            fullName: fullName,
+            contact: ""
+        });
+        await parentRepo.save(newParent);
+    }
+
     const token = generateToken(newUser.id, newUser.email, newUser.userType);
     console.log(token);
 

@@ -1,7 +1,7 @@
 import { where } from "sequelize";
 import { myDataSource } from "../config/db.js";
 import { UserType } from "../utils/enum.js";
-import { Not, In } from "typeorm";
+import { Not, In, Like } from "typeorm";
 
 const teacherRepo = myDataSource.getRepository("Teacher");
 const userRepo = myDataSource.getRepository("User");
@@ -304,9 +304,9 @@ export const updateTeacherSpecialization = async (req, res) => {
       });
     }
 
-    // Check if specialization exists as a subject
+    // Check if specialization exists as a subject (fuzzy match for grade modifiers)
     const subject = await subjectRepo.findOne({
-      where: { subjectName: specialization },
+      where: { subjectName: Like(`${specialization}%`) },
     });
 
     if (!subject) {

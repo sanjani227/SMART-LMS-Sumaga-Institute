@@ -28,9 +28,9 @@ export const getClasses = async (req, res) => {
 
 export const createClasses = async (req, res) => {
   try {
-    const { teacherId, subjectId, scheduleDay, scheduleTime } = req.body;
+    const { teacherId, subjectId, grade, scheduleDay, scheduleTime } = req.body;
 
-    if (!teacherId || !subjectId || !scheduleDay || !scheduleTime) {
+    if (!teacherId || (!subjectId && !grade) || !scheduleDay || !scheduleTime) {
       return res.json({
         code: 403,
         message: "All fields should be complete",
@@ -52,9 +52,35 @@ export const createClasses = async (req, res) => {
       });
     }
 
+    let finalSubjectId = subjectId;
+
+    if (!finalSubjectId && grade) {
+       const teacherInfo = validTeacherId[0];
+       if (!teacherInfo.specialization) {
+           return res.json({
+               code: 400,
+               message: "Teacher does not have a set specialization. Admin must assign one."
+           });
+       }
+
+       const expectedSubjectName = `${teacherInfo.specialization} (Grade ${grade})`;
+       const subjectLookup = await subjectRepo.findOne({
+           where: { subjectName: expectedSubjectName }
+       });
+
+       if (!subjectLookup) {
+           return res.json({
+               code: 404,
+               message: `Subject '${expectedSubjectName}' does not exist.`
+           });
+       }
+
+       finalSubjectId = subjectLookup.subjectId;
+    }
+
     const validSubjectId = await subjectRepo.find({
       where: {
-        subjectId: subjectId,
+        subjectId: finalSubjectId,
       },
     });
 
@@ -67,7 +93,7 @@ export const createClasses = async (req, res) => {
 
     const newClass = await classRepo.create({
       teacherId: teacherId,
-      subjectId: subjectId,
+      subjectId: finalSubjectId,
       scheduleDay: scheduleDay,
       scheduleTime: scheduleTime,
     });

@@ -78,7 +78,10 @@ export const getIncomeStats = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await adminRepo.findOne({ where: { id: parseInt(id) } });
+    const user = await adminRepo.findOne({ 
+        where: { id: parseInt(id) },
+        relations: ["teacherProfile"]
+    });
 
     if (!user) {
       return res.status(404).json({ code: 404, message: "User not found" });
@@ -93,7 +96,7 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, email, userType, isDeleted } = req.body;
+    const { firstName, lastName, email, userType, isDeleted, specialization } = req.body;
 
     const user = await adminRepo.findOne({ where: { id: parseInt(id) } });
 
@@ -108,6 +111,15 @@ export const updateUser = async (req, res) => {
     if (isDeleted !== undefined) user.isDeleted = isDeleted;
 
     await adminRepo.save(user);
+
+    if ((user.userType === "teacher" || userType === "teacher") && specialization !== undefined) {
+      const teacherRepo = myDataSource.getRepository("Teacher");
+      const teacher = await teacherRepo.findOne({ where: { userId: user.id } });
+      if (teacher) {
+        teacher.specialization = specialization;
+        await teacherRepo.save(teacher);
+      }
+    }
 
     return res.status(200).json({ code: 200, message: "User updated successfully", data: user });
   } catch (error) {

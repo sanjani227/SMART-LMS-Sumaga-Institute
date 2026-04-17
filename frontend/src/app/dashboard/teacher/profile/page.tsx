@@ -59,10 +59,10 @@ export default function TeacherProfile() {
   const fetchSubjects = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/v1/subjects`
+        `http://localhost:3000/api/v1/subjects/getSubjects`
       );
 
-      if (response.data.code === 200) {
+      if (response.data.data) {
         setSubjects(response.data.data);
       }
     } catch (error: any) {
@@ -218,9 +218,9 @@ export default function TeacherProfile() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select a subject...</option>
-              {subjects.map((subject) => (
-                <option key={subject.subjectId} value={subject.subjectName}>
-                  {subject.subjectName} (Grade {subject.gradeLevel})
+              {Array.from(new Set(subjects.map(s => s.subjectName.split(" (Grade")[0]))).map((baseSubjectName, idx) => (
+                <option key={idx} value={baseSubjectName}>
+                  {baseSubjectName}
                 </option>
               ))}
             </select>
