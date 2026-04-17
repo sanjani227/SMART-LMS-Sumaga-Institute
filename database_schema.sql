@@ -1,233 +1,370 @@
+-- =======================================================================================
+-- Database Schema for sumaga_lms
+-- Auto-generated from current database state
+-- =======================================================================================
 
-
--- 1. Database Creation (Fail-safe: Drops existing DB to ensure clean state)
 DROP DATABASE IF EXISTS sumaga_lms;
 CREATE DATABASE sumaga_lms;
 USE sumaga_lms;
 
--- =======================================================================================
--- 2. Table Definitions (Execution Order Preserved for Foreign Key Integrity)
--- =======================================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- ---------------------------------------------------------------------------------------
--- Table: users (Root Dependency)
--- Description: Central authentication table. Matches backend models/frontend validation.
+-- Table: announcements
 -- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS users;
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    firstName VARCHAR(255) NOT NULL,
-    lastName VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    userType ENUM('student', 'parent', 'teacher', 'admin', 'owner') NOT NULL DEFAULT 'student',
-    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    -- Data Integrity Checks (Fail-proof validation at DB level)
-    CONSTRAINT chk_email_format CHECK (email REGEXP '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$'),
-    CONSTRAINT chk_firstName_alpha CHECK (firstName REGEXP '^[a-zA-Z]+$'),
-    CONSTRAINT chk_lastName_alpha CHECK (lastName REGEXP '^[a-zA-Z]+$')
-    -- Note: Password length check omitted intentionally as we store HASHED passwords, which are long fixed strings.
-);
+DROP TABLE IF EXISTS `announcements`;
+CREATE TABLE `announcements` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `audience` text NOT NULL,
+  `by` varchar(255) NOT NULL DEFAULT 'Admin',
+  `isDeleted` tinyint NOT NULL DEFAULT '0',
+  `status` varchar(255) NOT NULL DEFAULT 'Published',
+  `date` varchar(255) NOT NULL,
+  `category` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------------------
--- Table: parents
--- Description: Extended profile for parents.
+-- Table: assessment_results
 -- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS parents;
-CREATE TABLE parents (
-    parentId INT AUTO_INCREMENT PRIMARY KEY,
-    userId INT NOT NULL,
-    fullName VARCHAR(255) NOT NULL,
-    contact VARCHAR(20) NOT NULL,
-    
-    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: students
--- Description: Extended profile for students, linking to Parent.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS students;
-CREATE TABLE students (
-    studentId INT AUTO_INCREMENT PRIMARY KEY,
-    userId INT NOT NULL,
-    fullName VARCHAR(255) NOT NULL,
-    dob DATE NOT NULL,
-    address TEXT,
-    grade VARCHAR(50) NOT NULL,
-    parentId INT, -- Can be NULL if parent not yet registered/linked, or enforce NOT NULL based on business rule.
-    
-    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (parentId) REFERENCES parents(parentId) ON DELETE SET NULL
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: teachers
--- Description: Extended profile for teachers.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS teachers;
-CREATE TABLE teachers (
-    teacherId INT AUTO_INCREMENT PRIMARY KEY,
-    userId INT NOT NULL,
-    fullName VARCHAR(255) NOT NULL,
-    specialization VARCHAR(100),
-    
-    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: subjects
--- Description: Academic subjects.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS subjects;
-CREATE TABLE subjects (
-    subjectId INT AUTO_INCREMENT PRIMARY KEY,
-    subjectName VARCHAR(100) NOT NULL UNIQUE,
-    gradeLevel VARCHAR(50) NOT NULL
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: classes
--- Description: Scheduled classes linking subjects and teachers.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS classes;
-CREATE TABLE classes (
-    classId INT AUTO_INCREMENT PRIMARY KEY,
-    subjectId INT NOT NULL,
-    teacherId INT NOT NULL,
-    scheduleDay ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday') NOT NULL,
-    scheduleTime TIME NOT NULL,
-    
-    FOREIGN KEY (subjectId) REFERENCES subjects(subjectId) ON DELETE CASCADE,
-    FOREIGN KEY (teacherId) REFERENCES teachers(teacherId) ON DELETE CASCADE
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: attendance
--- Description: Tracks student attendance for classes.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS attendance;
-CREATE TABLE attendance (
-    attendanceId INT AUTO_INCREMENT PRIMARY KEY,
-    studentId INT NOT NULL,
-    classId INT NOT NULL,
-    date DATE NOT NULL,
-    status ENUM('Present', 'Absent', 'Late', 'Excused') NOT NULL DEFAULT 'Absent',
-    
-    FOREIGN KEY (studentId) REFERENCES students(studentId) ON DELETE CASCADE,
-    FOREIGN KEY (classId) REFERENCES classes(classId) ON DELETE CASCADE,
-    UNIQUE KEY unique_attendance (studentId, classId, date) -- Prevent duplicate attendance records
-);
-
--- ---------------------------------------------------------------------------------------
--- Table: payments
--- Description: Financial records for student fees.
--- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS payments;
-CREATE TABLE payments (
-    paymentId INT AUTO_INCREMENT PRIMARY KEY,
-    studentId INT NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
-    paymentDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    paymentType ENUM('Cash', 'Card', 'Online', 'Transfer') NOT NULL,
-    status ENUM('Pending', 'Completed', 'Failed') NOT NULL DEFAULT 'Completed',
-    
-    FOREIGN KEY (studentId) REFERENCES students(studentId) ON DELETE CASCADE,
-    CONSTRAINT chk_amount_positive CHECK (amount > 0)
-);
+DROP TABLE IF EXISTS `assessment_results`;
+CREATE TABLE `assessment_results` (
+  `resultId` int NOT NULL AUTO_INCREMENT,
+  `assessmentId` int NOT NULL,
+  `studentId` int NOT NULL,
+  `totalScore` int NOT NULL DEFAULT '0',
+  `percentage` decimal(5,2) DEFAULT NULL,
+  `grade` varchar(255) DEFAULT NULL,
+  `status` enum('completed','in_progress','not_started') NOT NULL DEFAULT 'not_started',
+  `startedAt` timestamp NULL DEFAULT NULL,
+  `completedAt` timestamp NULL DEFAULT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`resultId`),
+  KEY `FK_73d09446c6f30e6a7b1cbba18d9` (`assessmentId`),
+  KEY `FK_7265fdddcf81c52cf477e7f4b91` (`studentId`),
+  CONSTRAINT `FK_7265fdddcf81c52cf477e7f4b91` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_73d09446c6f30e6a7b1cbba18d9` FOREIGN KEY (`assessmentId`) REFERENCES `assessments` (`assessmentId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------------------
 -- Table: assessments
--- Description: Tests/Exams created for a class.
 -- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS assessments;
-CREATE TABLE assessments (
-    assessmentId INT AUTO_INCREMENT PRIMARY KEY,
-    classId INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    maxMarks INT NOT NULL,
-    
-    FOREIGN KEY (classId) REFERENCES classes(classId) ON DELETE CASCADE,
-    CONSTRAINT chk_maxMarks_positive CHECK (maxMarks > 0)
-);
+DROP TABLE IF EXISTS `assessments`;
+CREATE TABLE `assessments` (
+  `assessmentId` int NOT NULL AUTO_INCREMENT,
+  `classId` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `maxMarks` int NOT NULL,
+  `description` text,
+  `type` enum('quiz','test','exam','midterm','final') NOT NULL DEFAULT 'quiz',
+  `totalMarks` int NOT NULL DEFAULT '100',
+  `duration` int DEFAULT NULL COMMENT 'Duration in minutes',
+  `startTime` datetime NOT NULL,
+  `endTime` datetime NOT NULL,
+  `isActive` tinyint NOT NULL DEFAULT '1',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updatedAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`assessmentId`),
+  KEY `FK_b4f3db3ac8ac27cfb43c70572bd` (`classId`),
+  CONSTRAINT `FK_b4f3db3ac8ac27cfb43c70572bd` FOREIGN KEY (`classId`) REFERENCES `classes` (`classId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------------------
--- Table: results
--- Description: Student scores for assessments.
+-- Table: assignment_submissions
 -- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS results;
-CREATE TABLE results (
-    resultId INT AUTO_INCREMENT PRIMARY KEY,
-    assessmentId INT NOT NULL,
-    studentId INT NOT NULL,
-    marksObtained INT NOT NULL,
-    
-    FOREIGN KEY (assessmentId) REFERENCES assessments(assessmentId) ON DELETE CASCADE,
-    FOREIGN KEY (studentId) REFERENCES students(studentId) ON DELETE CASCADE,
-    CONSTRAINT chk_marks_valid CHECK (marksObtained >= 0)
-);
+DROP TABLE IF EXISTS `assignment_submissions`;
+CREATE TABLE `assignment_submissions` (
+  `submissionId` int NOT NULL AUTO_INCREMENT,
+  `assignmentId` int NOT NULL,
+  `studentId` int NOT NULL,
+  `submissionText` text,
+  `attachmentPath` varchar(255) DEFAULT NULL,
+  `score` decimal(5,2) DEFAULT NULL,
+  `feedback` text,
+  `status` enum('submitted','graded','late','pending') NOT NULL DEFAULT 'pending',
+  `submittedAt` timestamp NULL DEFAULT NULL,
+  `gradedAt` timestamp NULL DEFAULT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`submissionId`),
+  KEY `FK_6e8a68594fde52f61876a40489c` (`assignmentId`),
+  KEY `FK_dfb5017c979e0e8e47659b0da24` (`studentId`),
+  CONSTRAINT `FK_6e8a68594fde52f61876a40489c` FOREIGN KEY (`assignmentId`) REFERENCES `assignments` (`assignmentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_dfb5017c979e0e8e47659b0da24` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------------------
+-- Table: assignments
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `assignments`;
+CREATE TABLE `assignments` (
+  `assignmentId` int NOT NULL AUTO_INCREMENT,
+  `classId` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `dueDate` datetime NOT NULL,
+  `maxScore` decimal(5,2) NOT NULL DEFAULT '100.00',
+  `attachmentPath` varchar(255) DEFAULT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updatedAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`assignmentId`),
+  KEY `FK_c5382064b68e93e2ac371de898e` (`classId`),
+  CONSTRAINT `FK_c5382064b68e93e2ac371de898e` FOREIGN KEY (`classId`) REFERENCES `classes` (`classId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------------------
+-- Table: attendance
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `attendance`;
+CREATE TABLE `attendance` (
+  `attendanceId` int NOT NULL AUTO_INCREMENT,
+  `studentId` int NOT NULL,
+  `classId` int NOT NULL,
+  `status` enum('present','absent','late','excused') NOT NULL DEFAULT 'absent',
+  `attendanceDate` date NOT NULL,
+  `remarks` text,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updatedAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`attendanceId`),
+  KEY `FK_120e1c6edcec4f8221f467c8039` (`studentId`),
+  KEY `FK_af129543ec010c822cb6f0254b5` (`classId`),
+  CONSTRAINT `FK_120e1c6edcec4f8221f467c8039` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_af129543ec010c822cb6f0254b5` FOREIGN KEY (`classId`) REFERENCES `classes` (`classId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------------------
+-- Table: classes
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `classes`;
+CREATE TABLE `classes` (
+  `classId` int NOT NULL AUTO_INCREMENT,
+  `subjectId` int NOT NULL,
+  `teacherId` int NOT NULL,
+  `scheduleDay` enum('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') NOT NULL,
+  `scheduleTime` time NOT NULL,
+  `isDeleted` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`classId`),
+  KEY `FK_6df8dacbeed6e130c7032bf6f74` (`subjectId`),
+  KEY `FK_4b7ac7a7eb91f3e04229c7c0b6f` (`teacherId`),
+  CONSTRAINT `FK_4b7ac7a7eb91f3e04229c7c0b6f` FOREIGN KEY (`teacherId`) REFERENCES `teachers` (`teacherId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_6df8dacbeed6e130c7032bf6f74` FOREIGN KEY (`subjectId`) REFERENCES `subjects` (`subjectId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ---------------------------------------------------------------------------------------
 -- Table: learning_materials
--- Description: Files uploaded for classes.
 -- ---------------------------------------------------------------------------------------
-DROP TABLE IF EXISTS learning_materials;
-CREATE TABLE learning_materials (
-    materialId INT AUTO_INCREMENT PRIMARY KEY,
-    classId INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    filePath VARCHAR(500) NOT NULL,
-    uploadDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (classId) REFERENCES classes(classId) ON DELETE CASCADE
-);
+DROP TABLE IF EXISTS `learning_materials`;
+CREATE TABLE `learning_materials` (
+  `materialId` int NOT NULL AUTO_INCREMENT,
+  `classId` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `filePath` varchar(500) NOT NULL,
+  `uploadDate` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`materialId`),
+  KEY `FK_8c9188e826ea2ee87a9a3a14ec2` (`classId`),
+  CONSTRAINT `FK_8c9188e826ea2ee87a9a3a14ec2` FOREIGN KEY (`classId`) REFERENCES `classes` (`classId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- =======================================================================================
--- 3. Initial Data Seeding (For Testing & UI Verification)
--- =======================================================================================
+-- ---------------------------------------------------------------------------------------
+-- Table: parents
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `parents`;
+CREATE TABLE `parents` (
+  `parentId` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL,
+  `fullName` varchar(255) NOT NULL,
+  `contact` varchar(255) NOT NULL,
+  PRIMARY KEY (`parentId`),
+  UNIQUE KEY `REL_f1e08daeefd9c2e5def5746be7` (`userId`),
+  CONSTRAINT `FK_f1e08daeefd9c2e5def5746be7e` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert Owner/Super Admin
-INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', 'sumaga123', 'owner'); 
--- Note: Password in production MUST be hashed using bcrypt/argon2. 'sumaga123' is placeholder.
+-- ---------------------------------------------------------------------------------------
+-- Table: payments
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `payments`;
+CREATE TABLE `payments` (
+  `paymentId` int NOT NULL AUTO_INCREMENT,
+  `studentId` int NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `paymentType` enum('tuition','registration','material_fee','exam_fee','late_fee','other') NOT NULL DEFAULT 'tuition',
+  `status` enum('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `paymentMethod` enum('cash','bank_transfer','card','mobile_money','cheque') NOT NULL,
+  `reference` varchar(255) DEFAULT NULL,
+  `dueDate` date DEFAULT NULL,
+  `paidDate` date DEFAULT NULL,
+  `description` text,
+  `receiptNumber` varchar(255) DEFAULT NULL,
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updatedAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `slipUrl` longtext,
+  PRIMARY KEY (`paymentId`),
+  UNIQUE KEY `IDX_866ddee0e17d9385b4e3b86851` (`reference`),
+  UNIQUE KEY `IDX_ccf1990399854743306e7ab852` (`receiptNumber`),
+  KEY `FK_b2731e10aef7f886a08c552290e` (`studentId`),
+  CONSTRAINT `FK_b2731e10aef7f886a08c552290e` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert Sample Teacher
-INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Nipun', 'Perera', 'Nipun.Perera@example.com', 'teacher123', 'teacher');
+-- ---------------------------------------------------------------------------------------
+-- Table: questions
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `questions`;
+CREATE TABLE `questions` (
+  `questionId` int NOT NULL AUTO_INCREMENT,
+  `assessmentId` int NOT NULL,
+  `questionText` text NOT NULL,
+  `questionType` enum('multiple_choice','true_false','short_answer','essay') NOT NULL DEFAULT 'multiple_choice',
+  `options` json DEFAULT NULL COMMENT 'For multiple choice questions',
+  `correctAnswer` text,
+  `points` int NOT NULL DEFAULT '1',
+  `order` int NOT NULL,
+  PRIMARY KEY (`questionId`),
+  KEY `FK_465acef6f7d1194fb40a2e786cf` (`assessmentId`),
+  CONSTRAINT `FK_465acef6f7d1194fb40a2e786cf` FOREIGN KEY (`assessmentId`) REFERENCES `assessments` (`assessmentId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO teachers (userId, fullName, specialization)
-VALUES ((SELECT id FROM users WHERE email='Nipun.Perera@example.com'), 'Nipun Perera', 'Mathematics');
+-- ---------------------------------------------------------------------------------------
+-- Table: results
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `results`;
+CREATE TABLE `results` (
+  `resultId` int NOT NULL AUTO_INCREMENT,
+  `assessmentId` int NOT NULL,
+  `studentId` int NOT NULL,
+  `marksObtained` int NOT NULL,
+  PRIMARY KEY (`resultId`),
+  KEY `FK_da07d57f43a104a35dbaeeef940` (`assessmentId`),
+  KEY `FK_c09b15b279d5542d4f130bc4cdb` (`studentId`),
+  CONSTRAINT `FK_c09b15b279d5542d4f130bc4cdb` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_da07d57f43a104a35dbaeeef940` FOREIGN KEY (`assessmentId`) REFERENCES `assessments` (`assessmentId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert Sample Parent
-INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Kamal', 'Perera', 'Kamal.Perera@example.com', 'parent123', 'parent');
+-- ---------------------------------------------------------------------------------------
+-- Table: student_answers
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `student_answers`;
+CREATE TABLE `student_answers` (
+  `answerId` int NOT NULL AUTO_INCREMENT,
+  `questionId` int NOT NULL,
+  `studentId` int NOT NULL,
+  `assessmentId` int NOT NULL,
+  `answer` text,
+  `isCorrect` tinyint DEFAULT NULL,
+  `pointsEarned` int NOT NULL DEFAULT '0',
+  `answeredAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`answerId`),
+  KEY `FK_ddc3986d2a233f54cc215067913` (`questionId`),
+  KEY `FK_f6341cc688c8086ef66c5c6293d` (`studentId`),
+  KEY `FK_61099b87e790c0e446adea8c30c` (`assessmentId`),
+  CONSTRAINT `FK_61099b87e790c0e446adea8c30c` FOREIGN KEY (`assessmentId`) REFERENCES `assessments` (`assessmentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_ddc3986d2a233f54cc215067913` FOREIGN KEY (`questionId`) REFERENCES `questions` (`questionId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_f6341cc688c8086ef66c5c6293d` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO parents (userId, fullName, contact)
-VALUES ((SELECT id FROM users WHERE email='Kamal.Perera@example.com'), 'Kamal Perera', '0771234567');
+-- ---------------------------------------------------------------------------------------
+-- Table: student_classes
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `student_classes`;
+CREATE TABLE `student_classes` (
+  `studentClassId` int NOT NULL AUTO_INCREMENT,
+  `studentId` int NOT NULL,
+  `classId` int NOT NULL,
+  `enrollmentDate` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `status` enum('active','inactive','dropped') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`studentClassId`),
+  KEY `FK_033117f841e292b127c2770693a` (`studentId`),
+  KEY `FK_3f18cbd0ea5362b0c8727070739` (`classId`),
+  CONSTRAINT `FK_033117f841e292b127c2770693a` FOREIGN KEY (`studentId`) REFERENCES `students` (`studentId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_3f18cbd0ea5362b0c8727070739` FOREIGN KEY (`classId`) REFERENCES `classes` (`classId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert Sample Student
-INSERT INTO users (firstName, lastName, email, password, userType) 
-VALUES ('Sanjani', 'Imesha', 'Sanjani.Imesha@example.com', 'student123', 'student');
+-- ---------------------------------------------------------------------------------------
+-- Table: students
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `students`;
+CREATE TABLE `students` (
+  `studentId` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL,
+  `fullName` varchar(255) NOT NULL,
+  `dob` date DEFAULT NULL,
+  `address` text,
+  `grade` varchar(255) DEFAULT NULL,
+  `parentId` int DEFAULT NULL,
+  `contact` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`studentId`),
+  UNIQUE KEY `REL_e0208b4f964e609959aff431bf` (`userId`),
+  KEY `FK_6fea943b3b432a9e3e38d53c31b` (`parentId`),
+  CONSTRAINT `FK_6fea943b3b432a9e3e38d53c31b` FOREIGN KEY (`parentId`) REFERENCES `parents` (`parentId`) ON DELETE SET NULL,
+  CONSTRAINT `FK_e0208b4f964e609959aff431bf9` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO students (userId, fullName, dob, address, grade, parentId)
-VALUES (
-    (SELECT id FROM users WHERE email='Sanjani.Imesha@example.com'), 
-    'Sanjani Imesha', 
-    '2010-05-15', 
-    '123 Galle Road', 
-    'Grade 10', 
-    (SELECT parentId FROM parents WHERE fullName='Kamal Perera')
-);
+-- ---------------------------------------------------------------------------------------
+-- Table: study-materials
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `study-materials`;
+CREATE TABLE `study-materials` (
+  `fileId` int NOT NULL AUTO_INCREMENT,
+  `fileName` varchar(255) NOT NULL,
+  `grade` int NOT NULL,
+  `isDeleted` tinyint NOT NULL DEFAULT '0',
+  `createdAt` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `subjectId` int NOT NULL,
+  `teacherId` int NOT NULL,
+  PRIMARY KEY (`fileId`),
+  KEY `FK_ba4e7e1055d96053c55b851e071` (`subjectId`),
+  KEY `FK_3934106299a0291c2c54671f1d0` (`teacherId`),
+  CONSTRAINT `FK_3934106299a0291c2c54671f1d0` FOREIGN KEY (`teacherId`) REFERENCES `teachers` (`teacherId`) ON DELETE CASCADE,
+  CONSTRAINT `FK_ba4e7e1055d96053c55b851e071` FOREIGN KEY (`subjectId`) REFERENCES `subjects` (`subjectId`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert Sample Subject & Class
-INSERT INTO subjects (subjectName, gradeLevel) VALUES ('Mathematics', 'Grade 10');
+-- ---------------------------------------------------------------------------------------
+-- Table: subjects
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `subjects`;
+CREATE TABLE `subjects` (
+  `subjectId` int NOT NULL AUTO_INCREMENT,
+  `subjectName` varchar(255) NOT NULL,
+  `gradeLevel` varchar(255) NOT NULL,
+  PRIMARY KEY (`subjectId`),
+  UNIQUE KEY `IDX_06f2f0b8c4f0220ff847a920f9` (`subjectName`)
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO classes (subjectId, teacherId, scheduleDay, scheduleTime) 
-VALUES (
-    (SELECT subjectId FROM subjects WHERE subjectName='Mathematics'),
-    (SELECT teacherId FROM teachers WHERE fullName='Nipun Perera'),
-    'Monday',
-    '08:30:00'
-);
+-- ---------------------------------------------------------------------------------------
+-- Table: teachers
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `teachers`;
+CREATE TABLE `teachers` (
+  `teacherId` int NOT NULL AUTO_INCREMENT,
+  `userId` int NOT NULL,
+  `fullName` varchar(255) NOT NULL,
+  `specialization` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`teacherId`),
+  UNIQUE KEY `REL_4d8041cbc103a5142fa2f2afad` (`userId`),
+  CONSTRAINT `FK_4d8041cbc103a5142fa2f2afad4` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ---------------------------------------------------------------------------------------
+-- Table: users
+-- ---------------------------------------------------------------------------------------
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `firstName` varchar(255) NOT NULL,
+  `lastName` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `userType` enum('student','parent','teacher','admin','owner') NOT NULL DEFAULT 'student',
+  `createdAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updatedAt` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `isDeleted` tinyint NOT NULL DEFAULT '0',
+  `otp` varchar(255) DEFAULT NULL,
+  `otpExpires` datetime DEFAULT NULL,
+  `notifications` text,
+  `systemPreferences` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `IDX_97672ac88f789774dd47f7c8be` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
