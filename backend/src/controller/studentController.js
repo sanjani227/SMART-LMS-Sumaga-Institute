@@ -524,6 +524,11 @@ export const enrollInClass = async (req, res) => {
 
     await studentClassRepo.save(enrollment);
 
+    if (!student.grade && classSession.subject?.gradeLevel) {
+      student.grade = classSession.subject.gradeLevel;
+      await studentRepo.save(student);
+    }
+
     return res.json({
       code: 200,
       message: "Successfully enrolled in class",
