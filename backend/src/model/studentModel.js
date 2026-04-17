@@ -9,6 +9,7 @@ export const Student = new EntitySchema({
         fullName: { type: "varchar", nullable: false },
         dob: { type: "date", nullable: true },
         address: { type: "text", nullable: true },
+        contact: { type: "varchar", nullable: true },
         grade: { type: "varchar", nullable: true },
         parentId: { type: "int", nullable: true },
     },

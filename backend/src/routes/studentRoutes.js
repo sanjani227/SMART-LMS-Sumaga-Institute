@@ -12,6 +12,8 @@ import {
   enrollInClass,
   getStudentSettings,
   updateStudentParent,
+  processPayment,
+  updateStudentProfile,
 } from '../controller/studentController.js';
 import { authenticate, requireStudent } from '../middleware/authentication.js';
 
@@ -52,5 +54,11 @@ studentRoute.get("/settings", authenticate, requireStudent, getStudentSettings);
 
 // Update student's parent (protected)
 studentRoute.put("/parent", authenticate, requireStudent, updateStudentParent);
+
+// Update student profile (protected)
+studentRoute.put("/profile", authenticate, requireStudent, updateStudentProfile);
+
+// Process payment (protected)
+studentRoute.post("/payments/:paymentId/pay", authenticate, requireStudent, processPayment);
 
 export default studentRoute;
