@@ -28,7 +28,6 @@ export const RegisterUser = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     const newUser = userRepo.create({
-      id,
       firstName,
       lastName,
       email,
@@ -37,7 +36,7 @@ export const RegisterUser = async (req, res) => {
     });
     await userRepo.save(newUser);
 
-    const token = generateToken(newUser._id, newUser.email, newUser.userType);
+    const token = generateToken(newUser.id, newUser.email, newUser.userType);
     console.log(token);
 
     res.status(200).json({
@@ -51,7 +50,8 @@ export const RegisterUser = async (req, res) => {
       },
     });
   } catch (error) {
-    throw new Error(error);
+    console.error("Registration error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
