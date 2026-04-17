@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sumaga-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: sanjani2001
+      MYSQL_DATABASE: sumaga_lms
+      MYSQL_USER: root
+      MYSQL_PASSWORD: sanjani2001
+    ports:
+      - "3308:3306"
+    volumes:
+      # Mount a named volume for persistent data
+      - mysql_data:/var/lib/mysql
+    networks:
+      - lms-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psanjani2001"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  lms-network:
+    driver: bridge
