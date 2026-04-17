@@ -28,9 +28,9 @@ export const getClasses = async (req, res) => {
 
 export const createClasses = async (req, res) => {
   try {
-    const { teacherId, scheduleDay, scheduleTime } = req.body;
+    const { teacherId, subjectId, scheduleDay, scheduleTime } = req.body;
 
-    if (!teacherId || !scheduleDay || !scheduleTime) {
+    if (!teacherId || !subjectId || !scheduleDay || !scheduleTime) {
       return res.json({
         code: 403,
         message: "All fields should be complete",
@@ -52,23 +52,22 @@ export const createClasses = async (req, res) => {
       });
     }
 
-    const teacher = await teacherRepo.find({
+    const validSubjectId = await subjectRepo.find({
       where: {
-        teacherId: teacherId,
+        subjectId: subjectId,
       },
     });
 
-    const subject = teacher[0].specialization;
-
-    const subjectID = await subjectRepo.find({
-      where: {
-        subjectName: subject,
-      },
-    });
+    if (!validSubjectId || validSubjectId.length == 0) {
+      return res.json({
+        code: 404,
+        message: "No subject found",
+      });
+    }
 
     const newClass = await classRepo.create({
       teacherId: teacherId,
-      subjectId: subjectID[0].subjectId,
+      subjectId: subjectId,
       scheduleDay: scheduleDay,
       scheduleTime: scheduleTime,
     });
@@ -162,7 +161,7 @@ export const checkClassOverlapForTeacher = async (
 export const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
-    const { teacherId, scheduleDay, scheduleTime, isDeleted } = req.body;
+    const { teacherId, subjectId, scheduleDay, scheduleTime, isDeleted } = req.body;
 
     const classInstance = await classRepo.findOne({ where: { classId: parseInt(id) } });
 
@@ -171,6 +170,7 @@ export const updateClass = async (req, res) => {
     }
 
     if (teacherId !== undefined) classInstance.teacherId = teacherId;
+    if (subjectId !== undefined) classInstance.subjectId = subjectId;
     if (scheduleDay !== undefined) classInstance.scheduleDay = scheduleDay;
     if (scheduleTime !== undefined) classInstance.scheduleTime = scheduleTime;
     if (isDeleted !== undefined) classInstance.isDeleted = isDeleted;

@@ -23,8 +23,10 @@ export default function ManageClassesPage() {
   // Add Class Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const [newClassDetails, setNewClassDetails] = useState({
     teacherId: "",
+    subjectId: "",
     scheduleDay: "Monday",
     scheduleTime: "08:00",
   });
@@ -36,6 +38,7 @@ export default function ManageClassesPage() {
   const [editClassDetails, setEditClassDetails] = useState({
     classId: "",
     teacherId: "",
+    subjectId: "",
     scheduleDay: "Monday",
     scheduleTime: "08:00",
     isDeleted: false
@@ -82,15 +85,28 @@ export default function ManageClassesPage() {
     }
   };
 
+  const getSubjects = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/subjects/getSubjects",
+        { withCredentials: true }
+      );
+      setSubjects(response.data.data);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+    }
+  };
+
   useEffect(() => {
     getAllClasses();
     getAllUsers();
     getTeachers();
+    getSubjects();
   }, []);
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newClassDetails.teacherId || !newClassDetails.scheduleDay || !newClassDetails.scheduleTime) {
+    if (!newClassDetails.teacherId || !newClassDetails.subjectId || !newClassDetails.scheduleDay || !newClassDetails.scheduleTime) {
       setSubmitError("Please fill out all fields.");
       return;
     }
@@ -107,7 +123,7 @@ export default function ManageClassesPage() {
       
       if (res.data.code === 200) {
         setShowAddModal(false);
-        setNewClassDetails({ teacherId: "", scheduleDay: "Monday", scheduleTime: "08:00" });
+        setNewClassDetails({ teacherId: "", subjectId: "", scheduleDay: "Monday", scheduleTime: "08:00" });
         getAllClasses(); // refresh list
       } else {
         setSubmitError(res.data.message || "Failed to create class.");
@@ -123,6 +139,7 @@ export default function ManageClassesPage() {
     setEditClassDetails({
       classId: cls.classId,
       teacherId: cls.teacherId,
+      subjectId: cls.subjectId || cls.subject?.subjectId || "",
       scheduleDay: cls.scheduleDay,
       scheduleTime: cls.scheduleTime,
       isDeleted: cls.isDeleted
@@ -139,6 +156,7 @@ export default function ManageClassesPage() {
     try {
       const payload = {
         teacherId: editClassDetails.teacherId,
+        subjectId: editClassDetails.subjectId,
         scheduleDay: editClassDetails.scheduleDay,
         scheduleTime: editClassDetails.scheduleTime,
         isDeleted: editClassDetails.isDeleted
@@ -379,7 +397,24 @@ export default function ManageClassesPage() {
                   <option value="" disabled>Select a teacher...</option>
                   {teachers?.map((t: any) => (
                     <option key={t.teacherId} value={t.teacherId}>
-                      {t.fullName} ({t.specialization || "No Specific Subject"})
+                      {t.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Assign Subject</label>
+                <select 
+                  value={newClassDetails.subjectId}
+                  onChange={(e) => setNewClassDetails({...newClassDetails, subjectId: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  <option value="" disabled>Select a subject...</option>
+                  {subjects?.map((s: any) => (
+                    <option key={s.subjectId} value={s.subjectId}>
+                      {s.subjectName}
                     </option>
                   ))}
                 </select>
@@ -452,7 +487,24 @@ export default function ManageClassesPage() {
                   <option value="" disabled>Select a teacher...</option>
                   {teachers?.map((t: any) => (
                     <option key={t.teacherId} value={t.teacherId}>
-                      {t.fullName} ({t.specialization || "No Specific Subject"})
+                      {t.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Assign Subject</label>
+                <select 
+                  value={editClassDetails.subjectId}
+                  onChange={(e) => setEditClassDetails({...editClassDetails, subjectId: e.target.value})}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
+                  required
+                >
+                  <option value="" disabled>Select a subject...</option>
+                  {subjects?.map((s: any) => (
+                    <option key={s.subjectId} value={s.subjectId}>
+                      {s.subjectName}
                     </option>
                   ))}
                 </select>
