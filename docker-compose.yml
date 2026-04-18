@@ -14,7 +14,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - lms-network
+      - lms-networkn
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psanjani2001"]
       timeout: 20s
