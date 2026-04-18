@@ -49,7 +49,7 @@ try {
 
 app.use(
   cors({
-    origin: "http://localhost:3001",  // ✅ Your frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:3001",  // ✅ Dynamic Frontend URL
     credentials: true,                 // ✅ Allow credentials
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
