@@ -1,8 +1,8 @@
 
 
 -- 1. Database Creation (Fail-safe: Drops existing DB to ensure clean state)
-DROP DATABASE IF EXISTS sumaga_lms;
-CREATE DATABASE sumaga_lms;
+-- DROP DATABASE IF EXISTS sumaga_lms; -- COMMENTED OUT TO PROTECT DATA
+CREATE DATABASE IF NOT EXISTS sumaga_lms;
 USE sumaga_lms;
 
 -- =======================================================================================

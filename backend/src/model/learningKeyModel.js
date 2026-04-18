@@ -1,29 +1,5 @@
 import { EntitySchema } from "typeorm";
 
-export const Assessment = new EntitySchema({
-    name: "Assessment",
-    tableName: "assessments",
-    columns: {
-        assessmentId: { primary: true, type: "int", generated: true },
-        classId: { type: "int", nullable: false },
-        title: { type: "varchar", nullable: false },
-        maxMarks: { type: "int", nullable: false },
-    },
-    relations: {
-        classSession: {
-            type: "many-to-one",
-            target: "Class",
-            joinColumn: { name: "classId" },
-            inverseSide: "assessments",
-            onDelete: "CASCADE",
-        },
-        results: {
-            type: "one-to-many",
-            target: "Result",
-            inverseSide: "assessment",
-        },
-    },
-});
 
 export const Result = new EntitySchema({
     name: "Result",
