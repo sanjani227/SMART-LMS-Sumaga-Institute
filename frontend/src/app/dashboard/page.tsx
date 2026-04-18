@@ -30,7 +30,7 @@ export default function DashboardPage() {
       if (role === 'teacher') {
         const token = localStorage.getItem("TOKEN") || localStorage.getItem("token")
         const classes = await axios.get(
-          "http://localhost:3000/api/v1/teachers/classes",
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -39,15 +39,15 @@ export default function DashboardPage() {
       }
 
       // Fetch global live announcements
-      const annRes = await axios.get("http://localhost:3000/api/v1/announcements/getAnnouncements");
+      const annRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/getAnnouncements`);
       if (annRes.data.code === 200) {
         setAnnouncements(annRes.data.data);
       }
 
       // Admin stats fetch
       if (role === 'admin') {
-        const usersRes = await axios.get("http://localhost:3000/api/v1/auth/allUsers");
-        const classesRes = await axios.get("http://localhost:3000/api/v1/classes/getClasses", { withCredentials: true });
+        const usersRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/allUsers`);
+        const classesRes = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/getClasses`, { withCredentials: true });
         
         const allUsers = usersRes.data.data || [];
         

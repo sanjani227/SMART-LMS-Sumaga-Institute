@@ -61,7 +61,7 @@ export default function TeacherAttendance() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `http://localhost:3000/api/v1/teachers/classes`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
         {
           withCredentials: true
         }
@@ -84,7 +84,7 @@ export default function TeacherAttendance() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `http://localhost:3000/api/v1/teachers/classes/${selectedClass.classId}/students?date=${selectedDate}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes/${selectedClass.classId}/students?date=${selectedDate}`,
         {
           withCredentials: true
         }
@@ -123,7 +123,7 @@ export default function TeacherAttendance() {
       });
 
       const response = await axios.post(
-        `http://localhost:3000/api/v1/teachers/attendance`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/attendance`,
         {
           classId: selectedClass.classId,
           date: selectedDate,

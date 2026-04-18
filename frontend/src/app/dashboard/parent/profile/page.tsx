@@ -37,7 +37,7 @@ export default function ParentProfilePage() {
     try {
       const token = localStorage.getItem("TOKEN");
       const response = await axios.get(
-        `http://localhost:3000/api/v1/parents/children`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/children`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -56,7 +56,7 @@ export default function ParentProfilePage() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `http://localhost:3000/api/v1/parents/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -86,7 +86,7 @@ export default function ParentProfilePage() {
       setSyncing(true);
       
       const response = await axios.get(
-        `http://localhost:3000/api/v1/parents/sync`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/sync`
       );
 
       if (response.data.code === 200) {
@@ -115,7 +115,7 @@ export default function ParentProfilePage() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.post(
-        `http://localhost:3000/api/v1/parents/link-student`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/link-student`,
         { studentEmail },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -147,7 +147,7 @@ export default function ParentProfilePage() {
         const token = localStorage.getItem("TOKEN");
         
         const response = await axios.put(
-            `http://localhost:3000/api/v1/parents/profile/update`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/parents/profile/update`,
             editForm,
             { headers: { Authorization: `Bearer ${token}` } }
         );

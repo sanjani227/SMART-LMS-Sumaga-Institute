@@ -23,7 +23,7 @@ export default function IncomeOverview() {
   const fetchIncomeStats = async () => {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("TOKEN");
-      const res = await axios.get("http://localhost:3000/api/v1/admin/income", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/admin/income`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.code === 200) {

@@ -36,7 +36,7 @@ export default function TeacherProfile() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.get(
-        `http://localhost:3000/api/v1/teachers/profile`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/profile`,
         {
           withCredentials: true
         }
@@ -59,7 +59,7 @@ export default function TeacherProfile() {
   const fetchSubjects = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/v1/subjects/getSubjects`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/subjects/getSubjects`
       );
 
       if (response.data.data) {
@@ -79,7 +79,7 @@ export default function TeacherProfile() {
       const token = localStorage.getItem("TOKEN");
       
       const response = await axios.put(
-        `http://localhost:3000/api/v1/teachers/specialization`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/specialization`,
         { specialization: selectedSubject },
         {
           withCredentials: true

@@ -37,7 +37,7 @@ export default function ChangePasswordPage() {
 
     setIsSubmitting(true);
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/auth/changePassword", {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/changePassword`, {
         email,
         newPassword
       });

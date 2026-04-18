@@ -34,7 +34,7 @@ export default function SubmissionsClient() {
     try {
       const token = localStorage.getItem("TOKEN");
       const res = await axios.get(
-        `http://localhost:3000/api/v1/teachers/assignments/${assignmentId}/submissions`, 
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments/${assignmentId}/submissions`, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -61,7 +61,7 @@ export default function SubmissionsClient() {
     try {
       const token = localStorage.getItem("TOKEN");
       const res = await axios.put(
-        `http://localhost:3000/api/v1/teachers/assignments/submissions/${selectedSubmission.submissionId}/grade`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/assignments/submissions/${selectedSubmission.submissionId}/grade`,
         {
           score: parseFloat(score),
           feedback
@@ -150,7 +150,7 @@ export default function SubmissionsClient() {
                     <td className="p-4">
                       {sub.fileUrl ? (
                         <a 
-                          href={`http://localhost:3000/${sub.fileUrl}`} 
+                          href={`${process.env.NEXT_PUBLIC_API_URL}/${sub.fileUrl}`} 
                           target="_blank" 
                           rel="noreferrer"
                           className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1"

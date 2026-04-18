@@ -19,7 +19,7 @@ export default function ReportsPage() {
     try {
       const token = localStorage.getItem("token") || localStorage.getItem("TOKEN");
       
-      const res = await axios.get("http://localhost:3000/api/v1/auth/allUsers", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/allUsers`, {
          headers: { Authorization: `Bearer ${token}` }
       });
 

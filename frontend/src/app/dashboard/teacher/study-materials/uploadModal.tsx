@@ -34,7 +34,7 @@ export default function UploadModal({
     formData.append("grade", grade);
     formData.append("subject", subject);
     const response = await axios.post(
-      "http://localhost:3000/api/v1/teachers/uploadStudyMaterials",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/uploadStudyMaterials`,
         formData,
       {
         withCredentials: true,
@@ -52,7 +52,7 @@ export default function UploadModal({
 
   const getSubject = async () => {
     const response = await axios.get(
-      "http://localhost:3000/api/v1/teachers/classes",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`,
       {
         withCredentials: true,
       },

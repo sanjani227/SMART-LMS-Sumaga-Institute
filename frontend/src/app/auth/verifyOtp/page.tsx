@@ -32,7 +32,7 @@ export default function VerifyOtpPage() {
         setIsSubmitting(true);
         try {
             // NOTE: Using port 3000 for backend API calls
-            const response = await axios.post("http://localhost:3000/api/v1/auth/verifyOtp", {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verifyOtp`, {
                 email,
                 otp
             });

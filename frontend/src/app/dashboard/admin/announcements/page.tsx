@@ -23,7 +23,7 @@ export default function AnnouncementsPage() {
 
   const fetchAnnouncements = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/v1/announcements/getAnnouncements");
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/getAnnouncements`);
       if (res.data.code === 200) {
         setAnnouncements(res.data.data);
       }
@@ -42,7 +42,7 @@ export default function AnnouncementsPage() {
     setSubmitError("");
     try {
       const payload = { ...formData, date: new Date().toLocaleDateString("en-GB"), by: "Admin" };
-      await axios.post("http://localhost:3000/api/v1/announcements/createAnnouncement", payload);
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/createAnnouncement`, payload);
       setShowAddModal(false);
       fetchAnnouncements();
     } catch (err: any) {
@@ -69,7 +69,7 @@ export default function AnnouncementsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axios.put(`http://localhost:3000/api/v1/announcements/${formData.id}`, formData);
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/${formData.id}`, formData);
       setShowEditModal(false);
       fetchAnnouncements();
     } catch (err) {
@@ -82,7 +82,7 @@ export default function AnnouncementsPage() {
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this announcement?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/v1/announcements/${id}`);
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/announcements/${id}`);
         fetchAnnouncements();
       } catch (err) {
         console.error("Delete failed", err);

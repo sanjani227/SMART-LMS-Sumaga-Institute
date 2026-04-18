@@ -47,7 +47,7 @@ export default function ManageClassesPage() {
   const getAllClasses = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/classes/getClasses",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/getClasses`,
         {
           withCredentials: true
         }
@@ -65,7 +65,7 @@ export default function ManageClassesPage() {
   const getAllUsers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/auth/allUsers",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/allUsers`,
       );
       setAllUsers(response.data.data);
     } catch (error) {
@@ -76,7 +76,7 @@ export default function ManageClassesPage() {
   const getTeachers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/teachers/getAllTeacher",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/getAllTeacher`,
         { withCredentials: true }
       );
       setTeachers(response.data.data);
@@ -88,7 +88,7 @@ export default function ManageClassesPage() {
   const getSubjects = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/subjects/getSubjects",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/subjects/getSubjects`,
         { withCredentials: true }
       );
       setSubjects(response.data.data);
@@ -116,7 +116,7 @@ export default function ManageClassesPage() {
     
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/v1/classes/createClass",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/createClass`,
         newClassDetails,
         { withCredentials: true }
       );
@@ -163,7 +163,7 @@ export default function ManageClassesPage() {
       };
 
       const res = await axios.put(
-        `http://localhost:3000/api/v1/classes/updateClass/${editClassDetails.classId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/updateClass/${editClassDetails.classId}`,
         payload,
         { withCredentials: true }
       );
@@ -184,7 +184,7 @@ export default function ManageClassesPage() {
   const handleDeleteClass = async (classId: number) => {
     if (confirm("Are you sure you want to deactivate/delete this class?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/v1/classes/deleteClass/${classId}`, {
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/deleteClass/${classId}`, {
           withCredentials: true
         });
         getAllClasses();

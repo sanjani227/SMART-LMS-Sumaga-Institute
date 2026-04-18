@@ -32,7 +32,7 @@ export function EditUserContent() {
 
   const fetchSubjects = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/v1/subjects/getSubjects`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/subjects/getSubjects`);
       if (response.data.data) {
         const baseSubjects = Array.from(new Set(response.data.data.map((s: any) => s.subjectName.split(' (Grade')[0])));
         setSubjects(baseSubjects);
@@ -45,7 +45,7 @@ export function EditUserContent() {
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`http://localhost:3000/api/v1/auth/users/${userId}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/users/${userId}`);
       if (res.data.code === 200) {
         const u = res.data.data;
         setFormData({
@@ -83,7 +83,7 @@ export function EditUserContent() {
     setIsSaving(true);
     setError('');
     try {
-      const res = await axios.put(`http://localhost:3000/api/v1/auth/users/${userId}`, formData);
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/users/${userId}`, formData);
       if (res.data.code === 200) {
         router.push('/dashboard/admin/users');
       } else {

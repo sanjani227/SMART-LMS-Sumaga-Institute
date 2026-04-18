@@ -30,7 +30,7 @@ export default function TeacherQuizzesPage() {
   const fetchQuizzes = async () => {
     try {
       const token = localStorage.getItem("TOKEN");
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/teachers/quizzes`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/teachers/quizzes`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
@@ -47,7 +47,7 @@ export default function TeacherQuizzesPage() {
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("TOKEN");
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/teachers/classes`, {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/teachers/classes`, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true
       });
@@ -73,7 +73,7 @@ export default function TeacherQuizzesPage() {
     try {
       const token = localStorage.getItem("TOKEN");
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/v1/teachers/quizzes`,
+        `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/teachers/quizzes`,
         {
           classId: parseInt(classId),
           title,

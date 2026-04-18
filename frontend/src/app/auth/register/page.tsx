@@ -47,7 +47,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterSchema) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/auth/register",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
         {
           firstName: data.firstName,
           lastName: data.lastName,

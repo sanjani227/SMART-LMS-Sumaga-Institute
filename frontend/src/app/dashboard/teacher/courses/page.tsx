@@ -25,7 +25,7 @@ export default function TeacherCoursesPage() {
   const fetchCourses = async () => {
     try {
       const token = localStorage.getItem("TOKEN");
-      const res = await axios.get("http://localhost:3000/api/v1/teachers/classes", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.data) {
@@ -50,7 +50,7 @@ export default function TeacherCoursesPage() {
     try {
       const token = localStorage.getItem("TOKEN");
       const res = await axios.post(
-        "http://localhost:3000/api/v1/classes/createClass",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/classes/createClass`,
         {
           teacherId,
           grade,

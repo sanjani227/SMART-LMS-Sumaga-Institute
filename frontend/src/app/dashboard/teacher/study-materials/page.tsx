@@ -12,7 +12,7 @@ export default function StudyMaterials() {
 
   const getAllUploadedFiles = async () => {
     const response = await axios.get(
-      "http://localhost:3000/api/v1/teachers/getStudyMaterials",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/getStudyMaterials`,
       {
         withCredentials: true,
       },

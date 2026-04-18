@@ -47,7 +47,7 @@ export default function ChildAttendanceContent() {
             setError(null);
 
             const childrenResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/v1/parents/children`,
+                `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/parents/children`,
                 {
                     withCredentials: true,
                 }
@@ -90,7 +90,7 @@ export default function ChildAttendanceContent() {
             setFetchingAttendance(true);
             setError(null);
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/v1/parents/children/${id}/attendance`,
+                `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/parents/children/${id}/attendance`,
                 {
                     withCredentials: true,
                 }

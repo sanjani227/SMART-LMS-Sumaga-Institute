@@ -31,7 +31,7 @@ export default function AddUserPage() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/auth/register",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
         {
           firstName: formData.name.split(" ")[0],
           lastName: formData.name.split(" ")[1] || formData.name.split(" ")[0],

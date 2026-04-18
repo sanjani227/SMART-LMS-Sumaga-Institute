@@ -29,7 +29,7 @@ export default function StudyMaterialsPage() {
   const fetchMaterials = async () => {
     try {
       const token = localStorage.getItem("TOKEN");
-      const res = await axios.get("http://localhost:3000/api/v1/teachers/getStudyMaterials", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/getStudyMaterials`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.data) {
@@ -46,7 +46,7 @@ export default function StudyMaterialsPage() {
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem("TOKEN");
-      const res = await axios.get("http://localhost:3000/api/v1/teachers/classes", {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/classes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data?.data?.classes) {
@@ -81,7 +81,7 @@ export default function StudyMaterialsPage() {
       });
 
       const res = await axios.post(
-        "http://localhost:3000/api/v1/teachers/uploadStudyMaterials",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/teachers/uploadStudyMaterials`,
         formData,
         {
           headers: { 
@@ -165,7 +165,7 @@ export default function StudyMaterialsPage() {
                   <p className="text-xs text-gray-500 font-medium mb-2">Attached Files:</p>
                   {mat.fileUrl ? (
                     <a 
-                      href={`http://localhost:3000/${mat.fileUrl}`} 
+                      href={`${process.env.NEXT_PUBLIC_API_URL}/${mat.fileUrl}`} 
                       target="_blank" 
                       rel="noreferrer"
                       className="flex items-center justify-between bg-gray-50 p-2 rounded-lg hover:bg-gray-100 transition group"

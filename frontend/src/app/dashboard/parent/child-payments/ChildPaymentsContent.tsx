@@ -47,7 +47,7 @@ export default function ChildPaymentsContent() {
             setLoading(true);
             const token = localStorage.getItem("TOKEN");
             const childrenResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/v1/parents/children`,
+                `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/parents/children`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -83,7 +83,7 @@ export default function ChildPaymentsContent() {
             setLoading(true);
             const token = localStorage.getItem("TOKEN");
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/v1/parents/children/${id}/payments`,
+                `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/parents/children/${id}/payments`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -131,7 +131,7 @@ export default function ChildPaymentsContent() {
             };
 
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/v1/parents/payments/${activeInvoice.paymentId}/pay`,
+                `${process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL}`}/api/v1/parents/payments/${activeInvoice.paymentId}/pay`,
                 payload,
                 { headers: { Authorization: `Bearer ${token}` } }
             );

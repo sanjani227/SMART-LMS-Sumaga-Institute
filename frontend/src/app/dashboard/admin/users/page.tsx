@@ -28,7 +28,7 @@ export default function ManageUsersPage() {
   const getAllUsers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/auth/allUsers",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/allUsers`,
       );
       console.log(" asbfjhabfjh", response.data.data);
       setAllUsers(response.data.data);
@@ -88,7 +88,7 @@ export default function ManageUsersPage() {
   const handleDeleteUser = async (userId: number) => {
     if (confirm("Are you sure you want to disable this user?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/v1/auth/users/${userId}`);
+        await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/users/${userId}`);
         getAllUsers(); // refresh data
       } catch (error) {
         console.error("Error deleting user:", error);

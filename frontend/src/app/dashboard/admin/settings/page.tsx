@@ -27,7 +27,7 @@ export default function SettingsPage() {
 
   const fetchUserData = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/v1/auth/me", { withCredentials: true });
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, { withCredentials: true });
       if (res.data.code === 200) {
         const user = res.data.data;
         setUserData(user);
@@ -52,7 +52,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await axios.put("http://localhost:3000/api/v1/auth/updateProfile", profileForm, { withCredentials: true });
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/updateProfile`, profileForm, { withCredentials: true });
       showMessage('success', 'Profile updated successfully!');
       fetchUserData();
       setTimeout(() => setActiveModal(null), 1000);
@@ -70,7 +70,7 @@ export default function SettingsPage() {
     }
     setIsSubmitting(true);
     try {
-      await axios.put("http://localhost:3000/api/v1/auth/updatePassword", {
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/updatePassword`, {
         currentPassword: securityForm.currentPassword,
         newPassword: securityForm.newPassword
       }, { withCredentials: true });
@@ -92,7 +92,7 @@ export default function SettingsPage() {
         ? { notifications: notificationsForm } 
         : { systemPreferences: systemForm };
         
-      await axios.put("http://localhost:3000/api/v1/auth/updatePreferences", payload, { withCredentials: true });
+      await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/updatePreferences`, payload, { withCredentials: true });
       showMessage('success', `${type === 'notifications' ? 'Notifications' : 'System preferences'} updated successfully!`);
       fetchUserData();
       setTimeout(() => setActiveModal(null), 1000);

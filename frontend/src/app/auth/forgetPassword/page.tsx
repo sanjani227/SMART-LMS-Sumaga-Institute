@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/auth/validateEmail",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/validateEmail`,
         {
           email,
         }
