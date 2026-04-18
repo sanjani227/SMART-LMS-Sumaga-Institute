@@ -377,3 +377,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 INSERT INTO `users` (`firstName`, `lastName`, `email`, `password`, `userType`)
 VALUES ('Sumudu', 'Asanka', 'Sumaga@gmail.com', '$2b$10$Bdg1pHaGKLSiupo1Qr8eeurFmxrEc4SzGBB.bIaYgXrjkJMGegWam', 'admin')
 ON DUPLICATE KEY UPDATE `email` = VALUES(`email`);
+
+-- Initial Subjects for Grades 6-11
+INSERT IGNORE INTO `subjects` (`subjectName`, `gradeLevel`) VALUES
+('Sinhala - Grade 6', '6'), ('English - Grade 6', '6'), ('IT - Grade 6', '6'), ('History - Grade 6', '6'), ('Mathematics - Grade 6', '6'), ('Science - Grade 6', '6'),
+('Sinhala - Grade 7', '7'), ('English - Grade 7', '7'), ('IT - Grade 7', '7'), ('History - Grade 7', '7'), ('Mathematics - Grade 7', '7'), ('Science - Grade 7', '7'),
+('Sinhala - Grade 8', '8'), ('English - Grade 8', '8'), ('IT - Grade 8', '8'), ('History - Grade 8', '8'), ('Mathematics - Grade 8', '8'), ('Science - Grade 8', '8'),
+('Sinhala - Grade 9', '9'), ('English - Grade 9', '9'), ('IT - Grade 9', '9'), ('History - Grade 9', '9'), ('Mathematics - Grade 9', '9'), ('Science - Grade 9', '9'),
+('Sinhala - Grade 10', '10'), ('English - Grade 10', '10'), ('IT - Grade 10', '10'), ('History - Grade 10', '10'), ('Mathematics - Grade 10', '10'), ('Science - Grade 10', '10'),
+('Sinhala - Grade 11', '11'), ('English - Grade 11', '11'), ('IT - Grade 11', '11'), ('History - Grade 11', '11'), ('Mathematics - Grade 11', '11'), ('Science - Grade 11', '11');
