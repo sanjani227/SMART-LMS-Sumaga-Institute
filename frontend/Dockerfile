@@ -18,6 +18,8 @@ RUN npm run build
 
 # Expose the default port
 EXPOSE 3001
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
 
 # Start the application
 CMD ["npm", "start"]
