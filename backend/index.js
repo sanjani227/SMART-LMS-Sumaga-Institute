@@ -10,8 +10,11 @@ import studentRoute from './src/routes/studentRoutes.js';
 import parentRoute from './src/routes/parentRoutes.js';
 import adminRoute from './src/routes/adminRoutes.js';
 import announcementRoute from './src/routes/announcementRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
@@ -57,6 +60,7 @@ app.use(
 );
 
 app.use(cookieParser());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Register routes BEFORE starting the server
 app.use('/api/v1/auth', authRouter)

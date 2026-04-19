@@ -236,9 +236,15 @@ export const uploadStudyMaterials = async (req, res) => {
     const savedMaterials = [];
 
     for (let file of files) {
+      let numericGrade = 1;
+      if (actualGrade) {
+         const match = String(actualGrade).match(/\d+/);
+         if (match) numericGrade = parseInt(match[0], 10);
+      }
+
       let studyMaterial = await studyMaterialRepo.create({
         fileName: title ? `${title} - ${file.filename}` : file.filename, // Keep title in filename for display
-        grade: parseInt(actualGrade),
+        grade: numericGrade,
         teacherId: teacher.teacherId,
         subjectId: subjectIdContext,
       });
@@ -278,9 +284,28 @@ export const getUploadedStudyMaterials = async (req, res) => {
         relations: ["teacher"]
     });
 
+    const formattedData = studyMaterials.map(mat => {
+        let displayTitle = mat.fileName;
+        let actualFileUrl = "uploads/" + mat.fileName;
+        if (mat.fileName.includes(" - ")) {
+           const parts = mat.fileName.split(" - ");
+           displayTitle = parts[0];
+           actualFileUrl = "uploads/" + parts.slice(1).join(" - ");
+        }
+
+        return {
+            materialId: mat.fileId,
+            title: displayTitle,
+            description: "", 
+            classId: mat.subjectId, 
+            fileUrl: actualFileUrl,
+            createdAt: mat.createdAt
+        };
+    });
+
     return res.json({
         code: 200,
-        data: studyMaterials
+        data: formattedData
     });
 
   } catch (error) {
