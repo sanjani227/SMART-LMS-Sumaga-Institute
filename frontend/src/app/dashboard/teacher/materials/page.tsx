@@ -139,8 +139,8 @@ export default function StudyMaterialsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {materials.map((mat) => (
-            <div key={mat.materialId} className="bg-white rounded-2xl border hover:shadow-md transition p-5 flex flex-col h-full">
+          {materials.map((mat, index) => (
+            <div key={mat.materialId || index} className="bg-white rounded-2xl border hover:shadow-md transition p-5 flex flex-col h-full">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0 pr-4">
                   <h3 className="text-lg font-bold text-gray-800 truncate" title={mat.title}>
@@ -218,8 +218,8 @@ export default function StudyMaterialsPage() {
                   required
                 >
                   {classes.length === 0 && <option value="">No classes available</option>}
-                  {classes.map((cls) => (
-                    <option key={cls.classId} value={cls.classId}>
+                  {classes.map((cls, index) => (
+                    <option key={cls.classId || index} value={cls.classId}>
                       Class {cls.classId}: {cls.subject?.subjectName} ({cls.scheduleDay})
                     </option>
                   ))}
