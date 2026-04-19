@@ -316,6 +316,39 @@ export const getUploadedStudyMaterials = async (req, res) => {
   }
 };
 
+export const deleteStudyMaterial = async (req, res) => {
+  try {
+    const { materialId } = req.params;
+    const teacherId = req.user.id;
+
+    const teacher = await teacherRepo.findOne({
+      where: { userId: teacherId },
+    });
+
+    if (!teacher) {
+      return res.status(404).json({ code: 404, message: "Teacher not found" });
+    }
+
+    const material = await studyMaterialRepo.findOne({
+      where: { fileId: parseInt(materialId), teacherId: teacher.teacherId }
+    });
+
+    if (!material) {
+      return res.status(404).json({ code: 404, message: "Material not found or access denied" });
+    }
+
+    await studyMaterialRepo.remove(material);
+
+    return res.json({
+      code: 200,
+      message: "Material deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete Material Error:", error);
+    return res.status(500).json({ code: 500, message: "Internal server error" });
+  }
+};
+
 // Update teacher's specialization/subject
 export const updateTeacherSpecialization = async (req, res) => {
   try {

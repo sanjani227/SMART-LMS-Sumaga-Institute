@@ -197,7 +197,20 @@ export const getStudentStudyMaterials = async (req, res) => {
 
     return res.json({
       code: 200,
-      data: filteredMaterials,
+      data: filteredMaterials.map(mat => {
+        let displayTitle = mat.fileName;
+        let actualFileName = mat.fileName;
+        if (mat.fileName && mat.fileName.includes(" - ")) {
+           const parts = mat.fileName.split(" - ");
+           displayTitle = parts[0];
+           actualFileName = parts.slice(1).join(" - ");
+        }
+        return {
+          ...mat,
+          title: displayTitle,
+          fileName: actualFileName
+        };
+      }),
       enrolledSubjects: enrolledSubjects,
     });
   } catch (error) {

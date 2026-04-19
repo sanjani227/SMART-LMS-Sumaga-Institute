@@ -6,6 +6,7 @@ import {
   classesForTeacher,
   uploadStudyMaterials,
   getUploadedStudyMaterials,
+  deleteStudyMaterial,
   updateTeacherSpecialization,
   getTeacherSpecialization,
   getTeacherStudents,
@@ -60,6 +61,7 @@ teacherRoute.get("/classes", authenticate, requireTeacher, classesForTeacher);
 teacherRoute.get("/students", authenticate, requireTeacher, getTeacherStudents);
 teacherRoute.post("/uploadStudyMaterials", upload.array('files', 10), authenticate, requireTeacher, uploadStudyMaterials);
 teacherRoute.get("/getStudyMaterials", authenticate, requireTeacher, getUploadedStudyMaterials);
+teacherRoute.delete("/deleteStudyMaterial/:materialId", authenticate, requireTeacher, deleteStudyMaterial);
 
 // Assignment routes
 teacherRoute.post("/assignments", authenticate, requireTeacher, createAssignment);

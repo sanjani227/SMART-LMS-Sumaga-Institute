@@ -17,6 +17,7 @@ interface StudyMaterial {
     fullName: string;
   };
   createdAt: string;
+  title?: string;
 }
 
 export default function StudentMaterials() {
@@ -182,7 +183,7 @@ export default function StudentMaterials() {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-800 mb-1">
-                        {material.fileName}
+                        {material.title || material.fileName}
                       </h4>
                       <div className="space-y-1">
                         <div className="flex items-center text-sm text-gray-600">

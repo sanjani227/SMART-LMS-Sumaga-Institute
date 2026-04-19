@@ -110,6 +110,28 @@ export default function StudyMaterialsPage() {
     }
   };
 
+  const handleDelete = async (materialId: number) => {
+    if (!confirm("Are you sure you want to delete this material?")) return;
+    try {
+      const token = localStorage.getItem("TOKEN");
+      const res = await axios.delete(
+        `http://localhost:3000/api/v1/teachers/deleteStudyMaterial/${materialId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      if (res.data.code === 200) {
+        toast.success("Material deleted successfully");
+        fetchMaterials();
+      } else {
+        toast.error(res.data.message || "Delete failed");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error deleting material");
+      console.error("Delete error:", error);
+    }
+  };
+
   return (
     <div className="p-6">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -185,6 +207,13 @@ export default function StudyMaterialsPage() {
                     <Calendar size={14} />
                     {new Date(mat.createdAt).toLocaleDateString()}
                   </div>
+                  <button
+                    onClick={() => handleDelete(mat.materialId)}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title="Delete Material"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             </div>
