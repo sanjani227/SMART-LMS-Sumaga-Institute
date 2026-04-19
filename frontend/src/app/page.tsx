@@ -1,8 +1,19 @@
+/**
+ * ========== HOME PAGE ==========
+ * File: frontend/src/app/page.tsx
+ * Purpose: Landing redirect page - routes to landing page or dashboard
+ * 
+ * @section Redirect Logic
+ */
 "use client";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+/**
+ * @component Home
+ * @description Redirect users to landing page on initial load
+ */
 export default function Home() {
   const router = useRouter();
 

@@ -1,5 +1,13 @@
+/**
+ * ========== STUDENT MODEL ==========
+ * File: backend/src/model/studentModel.js
+ * Purpose: TypeORM schema for Student entity (extended profile)
+ * 
+ * @section Schema Definition
+ */
 import { EntitySchema } from "typeorm";
 
+// ========== STUDENT ENTITY SCHEMA ==========
 export const Student = new EntitySchema({
     name: "Student",
     tableName: "students",

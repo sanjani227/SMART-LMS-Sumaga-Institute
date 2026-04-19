@@ -1,3 +1,10 @@
+/**
+ * ========== AUTHENTICATION CONTROLLER ==========
+ * File: backend/src/controller/authController.js
+ * Purpose: User authentication - register, login, password management, OTP verification
+ * 
+ * @section Imports
+ */
 
 import { generateToken } from "../middleware/token.js";
 
@@ -6,9 +13,15 @@ import { User } from "../model/ormAuthModel.js";
 import { myDataSource } from "../config/db.js";
 import { where } from "sequelize";
 
+// ========== DATABASE REPOSITORY SETUP ==========
 const userRepo = myDataSource.getRepository("User");
 
+// ========== AUTHENTICATION FUNCTIONS ==========
 
+/**
+ * @function RegisterUser
+ * @description User registration with email validation and password hashing
+ */
 export const RegisterUser = async (req, res) => {
   const { firstName, lastName, email, password, userType } = req.body;
   try {

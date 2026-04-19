@@ -1,10 +1,24 @@
+/**
+ * ========== ADMIN CONTROLLER ==========
+ * File: backend/src/controller/adminController.js
+ * Purpose: Handle admin operations - user management, payments, system oversight
+ * 
+ * @section Imports & Database Repositories
+ */
 import { myDataSource } from "../config/db.js";
 import { UserType } from "../utils/enum.js";
 import { Not } from "typeorm";
 
+// ========== DATABASE REPOSITORY INITIALIZATION ==========
 const adminRepo = myDataSource.getRepository("User");
 const paymentRepo = myDataSource.getRepository("Payment");
 
+// ========== ADMIN FUNCTIONS ==========
+
+/**
+ * @function getAllUsers
+ * @description Retrieve all non-admin users from the system
+ */
 export const getAllUsers = async (req, res) => {
   const users = await adminRepo.find({
     where: {

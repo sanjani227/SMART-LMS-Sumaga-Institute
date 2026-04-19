@@ -1,5 +1,16 @@
+/**
+ * ========== ACADEMIC DATA MODELS ==========
+ * File: backend/src/model/academicModel.js
+ * Purpose: TypeORM schemas for academic entities - Subjects and Classes
+ * 
+ * @section Imports
+ */
 import { EntitySchema } from "typeorm";
 
+// ========== SUBJECT ENTITY SCHEMA ==========
+/**
+ * Represents subjects/courses offered in the school
+ */
 export const Subject = new EntitySchema({
     name: "Subject",
     tableName: "subjects",
@@ -17,6 +28,10 @@ export const Subject = new EntitySchema({
     },
 });
 
+// ========== CLASS ENTITY SCHEMA ==========
+/**
+ * Represents classes/sections with their associated subject and teacher
+ */
 export const Class = new EntitySchema({
     name: "Class",
     tableName: "classes",

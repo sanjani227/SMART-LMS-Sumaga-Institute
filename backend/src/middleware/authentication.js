@@ -1,8 +1,15 @@
+/**
+ * ========== AUTHENTICATION MIDDLEWARE ==========
+ * File: backend/src/middleware/authentication.js
+ * Purpose: JWT token verification and user authentication
+ * 
+ * @section Setup
+ */
 import dotenv from "dotenv";
 dotenv.config();
 import jwt from "jsonwebtoken";
 
-// export const authenticate = (req, res, next) => {
+// ========== LEGACY CODE (DEPRECATED) ==========
 //   try {
 
 //     let token = null

@@ -1,3 +1,10 @@
+/**
+ * ========== STUDENT ROUTES ==========
+ * File: backend/src/routes/studentRoutes.js
+ * Purpose: Define endpoints for student operations
+ * 
+ * @section Imports
+ */
 import express from 'express';
 import { 
   syncStudentUser,
@@ -17,7 +24,10 @@ import {
 } from '../controller/studentController.js';
 import { authenticate, requireStudent } from '../middleware/authentication.js';
 
+// ========== STUDENT ROUTES INITIALIZATION ==========
 const studentRoute = express.Router();
+
+// ========== STUDENT PROFILE & SETTINGS ==========
 
 // Sync student data
 studentRoute.get("/sync", syncStudentUser);

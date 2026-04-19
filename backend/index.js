@@ -1,3 +1,11 @@
+/**
+ * ========== SMART LMS - BACKEND MAIN ENTRY POINT ==========
+ * File: backend/index.js
+ * Purpose: Express server initialization, database setup, route configuration
+ * 
+ * @section Imports & Setup
+ */
+
 import express from 'express';
 import authRouter from './src/routes/authRoutes.js';
 import subjectRouter from './src/routes/subjectRoutes.js';
@@ -13,17 +21,19 @@ import announcementRoute from './src/routes/announcementRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// ========== EXPRESS APP CONFIGURATION ==========
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
-
+========== DATABASE INITIALIZATION ==========
 // connectToDB();
 
 await myDataSource.initialize();
 console.log('✅ Database connected successfully to:', process.env.DB_NAME || 'sumaga_lms');
 
+// ========== DATABASE SYNC ON STARTUP ==========
 // --- SYNC DB AT STARTUP ---
 try {
   // Student sync

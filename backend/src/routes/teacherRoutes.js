@@ -1,3 +1,10 @@
+/**
+ * ========== TEACHER ROUTES ==========
+ * File: backend/src/routes/teacherRoutes.js
+ * Purpose: Define endpoints for teacher operations
+ * 
+ * @section Imports
+ */
 import express from "express";
 import {
   getAllTeachers,

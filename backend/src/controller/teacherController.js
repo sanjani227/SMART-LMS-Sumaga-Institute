@@ -1,13 +1,27 @@
+/**
+ * ========== TEACHER CONTROLLER ==========
+ * File: backend/src/controller/teacherController.js
+ * Purpose: Handle teacher operations - classes, study materials, assignments, assessments
+ * 
+ * @section Imports & Database Repositories
+ */
 import { where } from "sequelize";
 import { myDataSource } from "../config/db.js";
 import { UserType } from "../utils/enum.js";
 import { Not, In, Like } from "typeorm";
 
+// ========== DATABASE REPOSITORY INITIALIZATION ==========
 const teacherRepo = myDataSource.getRepository("Teacher");
 const userRepo = myDataSource.getRepository("User");
 const studyMaterialRepo = myDataSource.getRepository("StudyMaterial");
 const subjectRepo = myDataSource.getRepository("Subject");
 
+// ========== TEACHER FUNCTIONS ==========
+
+/**
+ * @function getAllTeachers
+ * @description Retrieve all teachers from database
+ */
 export const getAllTeachers = async (req, res) => {
   try {
     const teachers = await teacherRepo.find({

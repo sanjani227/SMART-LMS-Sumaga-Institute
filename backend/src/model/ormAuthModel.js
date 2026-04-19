@@ -1,6 +1,14 @@
+/**
+ * ========== USER AUTHENTICATION MODEL ==========
+ * File: backend/src/model/ormAuthModel.js
+ * Purpose: TypeORM schema for User entity (central auth table)
+ * 
+ * @section Schema Definition
+ */
 import { EntitySchema } from "typeorm";
 import { UserType } from "../utils/enum.js";
 
+// ========== USER ENTITY SCHEMA ==========
 export const User = new EntitySchema({
   name: "User",
   tableName: "users",

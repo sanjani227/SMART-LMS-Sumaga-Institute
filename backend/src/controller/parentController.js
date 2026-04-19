@@ -1,5 +1,13 @@
+/**
+ * ========== PARENT CONTROLLER ==========
+ * File: backend/src/controller/parentController.js
+ * Purpose: Handle parent operations - view children info, attendance, payments, progress
+ * 
+ * @section Imports & Database Repositories
+ */
 import { myDataSource } from "../config/db.js";
 
+// ========== DATABASE REPOSITORY INITIALIZATION ==========
 const parentRepo = myDataSource.getRepository("Parent");
 const studentRepo = myDataSource.getRepository("Student");
 const userRepo = myDataSource.getRepository("User");
@@ -8,6 +16,12 @@ const paymentRepo = myDataSource.getRepository("Payment");
 const assessmentResultRepo = myDataSource.getRepository("AssessmentResult");
 const studentClassRepo = myDataSource.getRepository("StudentClass");
 
+// ========== PARENT FUNCTIONS ==========
+
+/**
+ * @function getParentProfile
+ * @description Retrieve parent profile information with linked children
+ */
 // Get parent's profile information
 export const getParentProfile = async (req, res) => {
   try {

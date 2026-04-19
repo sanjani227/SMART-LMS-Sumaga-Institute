@@ -1,5 +1,16 @@
+/**
+ * ========== PARENT MODEL ==========
+ * File: backend/src/model/parentModel.js
+ * Purpose: TypeORM schema for Parent entity (extended profile)
+ * 
+ * @section Schema Definition
+ */
 import { EntitySchema } from "typeorm";
 
+// ========== PARENT ENTITY SCHEMA ==========
+/**
+ * Represents parent/guardian profiles with student relationships
+ */
 export const Parent = new EntitySchema({
     name: "Parent",
     tableName: "parents",

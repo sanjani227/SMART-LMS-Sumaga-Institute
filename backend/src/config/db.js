@@ -1,3 +1,10 @@
+/**
+ * ========== DATABASE CONFIGURATION ==========
+ * File: backend/src/config/db.js
+ * Purpose: TypeORM DataSource setup and database connection initialization
+ * 
+ * @section Legacy Code
+ */
 // import dotenv from "dotenv";
 // import mongoose from "mongoose";
 // dotenv.config();
@@ -11,6 +18,7 @@
 //     }
 // }
 
+// ========== TYPEORM DATABASE SETUP ==========
 import { DataSource } from "typeorm";
 import { User } from "../model/ormAuthModel.js";
 import { Parent } from "../model/parentModel.js";
@@ -29,6 +37,11 @@ import { Announcement } from "../model/announcementModel.js";
 
 dotenv.config();
 
+// ========== DATASOURCE CONFIGURATION ==========
+/**
+ * TypeORM MySQL connection and entity configuration
+ * Initializes database connection on app startup
+ */
 export const myDataSource = new DataSource({
   type: "mysql",
   host: process.env.DB_HOST || "127.0.0.1",

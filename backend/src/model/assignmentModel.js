@@ -1,5 +1,16 @@
+/**
+ * ========== ASSIGNMENT MODELS ==========
+ * File: backend/src/model/assignmentModel.js
+ * Purpose: TypeORM schemas for Assignment and AssignmentSubmission entities
+ * 
+ * @section Imports
+ */
 import { EntitySchema } from "typeorm";
 
+// ========== ASSIGNMENT ENTITY SCHEMA ==========
+/**
+ * Represents assignments created by teachers for students
+ */
 export const Assignment = new EntitySchema({
     name: "Assignment",
     tableName: "assignments",

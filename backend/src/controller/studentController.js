@@ -1,7 +1,15 @@
+/**
+ * ========== STUDENT CONTROLLER ==========
+ * File: backend/src/controller/studentController.js
+ * Purpose: Handle student operations - profile, courses, attendance, assignments, assessments
+ * 
+ * @section Imports & Database Repositories
+ */
 import { myDataSource } from "../config/db.js";
 import { UserType } from "../utils/enum.js";
 import { In } from "typeorm";
 
+// ========== DATABASE REPOSITORY INITIALIZATION ==========
 const studentRepo = myDataSource.getRepository("Student");
 const userRepo = myDataSource.getRepository("User");
 const studentClassRepo = myDataSource.getRepository("StudentClass");
@@ -15,6 +23,12 @@ const assessmentResultRepo = myDataSource.getRepository("AssessmentResult");
 const studyMaterialRepo = myDataSource.getRepository("StudyMaterial");
 const parentRepo = myDataSource.getRepository("Parent");
 
+// ========== HELPER FUNCTIONS ==========
+
+/**
+ * @function ensureParentProfilesSynced
+ * @description Synchronize parent profiles from user records
+ */
 const ensureParentProfilesSynced = async () => {
   const parentUsers = await userRepo.find({
     relations: ["parentProfile"],

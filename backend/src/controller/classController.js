@@ -1,9 +1,23 @@
+/**
+ * ========== CLASS CONTROLLER ==========
+ * File: backend/src/controller/classController.js
+ * Purpose: Handle class/section management - retrieve, create, update class information
+ * 
+ * @section Imports & Database Repositories
+ */
 import { myDataSource } from "../config/db.js";
 
+// ========== DATABASE REPOSITORY INITIALIZATION ==========
 const classRepo = myDataSource.getRepository("Class");
 const teacherRepo = myDataSource.getRepository("Teacher");
 const subjectRepo = myDataSource.getRepository("Subject");
 
+// ========== CLASS FUNCTIONS ==========
+
+/**
+ * @function getClasses
+ * @description Retrieve all classes with their associated teachers and subjects
+ */
 export const getClasses = async (req, res) => {
   try {
     const classes = await classRepo.find({
