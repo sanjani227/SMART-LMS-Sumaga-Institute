@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
-========== DATABASE INITIALIZATION ==========
+// ========== DATABASE INITIALIZATION ==========
 // connectToDB();
 
 await myDataSource.initialize();
