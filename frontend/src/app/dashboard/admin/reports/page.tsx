@@ -38,7 +38,7 @@ export default function ReportsPage() {
       } else if (reportType === 'Student Performance') {
          generated = students.map((s:any) => ({
             name: `${s.firstName} ${s.lastName}`,
-            grade: gradeFilter !== 'All Grades' ? gradeFilter : ['Grade 8', 'Grade 9', 'Grade 10'][Math.floor(Math.random()*3)],
+            grade: gradeFilter !== 'All Grades' ? gradeFilter : ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11'][Math.floor(Math.random()*6)],
             averageScore: Math.floor(Math.random() * 40 + 60), 
             status: 'Pass'
          }));
@@ -138,9 +138,12 @@ export default function ReportsPage() {
             <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Grade</label>
             <select value={gradeFilter} onChange={(e) => setGradeFilter(e.target.value)} className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-orange-200 outline-none transition cursor-pointer">
               <option value="All Grades">All Grades</option>
+              <option value="Grade 6">Grade 6</option>
+              <option value="Grade 7">Grade 7</option>
               <option value="Grade 8">Grade 8</option>
               <option value="Grade 9">Grade 9</option>
               <option value="Grade 10">Grade 10</option>
+              <option value="Grade 11">Grade 11</option>
             </select>
           </div>
         </div>
