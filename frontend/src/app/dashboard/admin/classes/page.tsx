@@ -210,8 +210,8 @@ export default function ManageClassesPage() {
       bg: "bg-green-50",
     },
     {
-      label: "Total Students",
-      value: allUsers.length,
+      label: "Registered Teachers",
+      value: teachers.length,
       icon: <Users size={24} />,
       color: "text-blue-500",
       bg: "bg-blue-50",
