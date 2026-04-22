@@ -54,8 +54,7 @@ export const getStudentsForAttendance = async (req, res) => {
       relations: ["student", "student.user", "class", "class.subject"],
     });
 
-    const attendanceDate = date ? new Date(date) : new Date();
-    attendanceDate.setHours(0, 0, 0, 0);
+    const attendanceDate = date ? date : new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
     // Check existing attendance for this date
     const existingAttendance = await attendanceRepo.find({
@@ -133,8 +132,7 @@ export const markAttendance = async (req, res) => {
       });
     }
 
-    const attendanceDate = date ? new Date(date) : new Date();
-    attendanceDate.setHours(0, 0, 0, 0);
+    const attendanceDate = date ? date : new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
     const savedAttendance = [];
 
@@ -254,7 +252,8 @@ export const getClassAttendanceHistory = async (req, res) => {
     // Group by date for easier display
     const attendanceByDate = {};
     attendance.forEach(att => {
-      const dateStr = att.attendanceDate.toISOString().split('T')[0];
+      const d = att.attendanceDate;
+      const dateStr = typeof d === 'string' ? d.split('T')[0] : d.toISOString().split('T')[0];
       if (!attendanceByDate[dateStr]) {
         attendanceByDate[dateStr] = [];
       }
